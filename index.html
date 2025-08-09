@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wealth Planning: FLIP NIM-CRUT, DAF & NING Trust Illustrator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fa;
+            font-size: 0.875rem;
+        }
+        .header {
+            background-color: #1a237e; /* Deep Navy Blue */
+        }
+        .card {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease-in-out;
+        }
+        .slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 1.25rem;
+            height: 1.25rem;
+            background: #1a237e;
+            cursor: pointer;
+            border-radius: 9999px;
+            border: 3px solid white;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.2);
+        }
+        .slider-thumb::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 1.25rem;
+            height: 1.25rem;
+            background: #1a237e;
+            cursor: pointer;
+            border-radius: 9999px;
+            border: 3px solid white;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.2);
+        }
+        .table-cell {
+            padding: 0.375rem 0.5rem;
+            text-align: right;
+            border-bottom: 1px solid #eef2f7;
+            white-space: nowrap;
+            font-size: 0.7rem;
+            line-height: 1.2;
+        }
+        .header-cell {
+            padding: 0.5rem 0.5rem;
+            text-align: right;
+            font-weight: 600;
+            color: #4a5568;
+            background-color: #f8f9fa;
+            border-bottom: 2px solid #e2e8f0;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            font-size: 0.7rem;
+            line-height: 1.2; /* Adjusted for wrapping */
+            white-space: normal; /* Allow wrapping */
+        }
+        .projection-table {
+            width: 100%;
+            table-layout: fixed;
+        }
+        .projection-table th, .projection-table td {
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        @media (max-width: 1280px) {
+            .projection-table {
+                min-width: 1200px;
+            }
+        }
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #1a237e;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #1a237e;
+        }
+        select, input[type="date"] {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-repeat: no-repeat;
+            background-position: right .7em top 50%;
+            background-size: .65em auto;
+        }
+        select {
+             background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23007CB2%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E');
+        }
+        .info-icon {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            margin-left: 0.25rem;
+            color: #90a4ae;
+            cursor: help;
+        }
+        .explanation-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out;
+        }
+        .explanation-card {
+            background-color: #f8f9fa;
+            border-left: 4px solid #4a5568;
+            padding: 1rem;
+            border-radius: 0.5rem;
+        }
+    </style>
+</head>
+<body class="text-gray-800 text-sm">
+
+    <!-- Header -->
+    <header class="header text-white p-4 shadow-md">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <svg class="w-8 h-8 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                <h1 class="text-lg font-bold">Able Wealth Management</h1>
+            </div>
+            <span class="text-xs opacity-80">Advanced Charitable Strategy Illustrator</span>
+        </div>
+    </header>
+
+    <main class="p-2 sm:p-4 lg:p-6">
+        <div class="max-w-full mx-auto px-2">
+            <!-- Main Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 xl:gap-6">
+
+                <!-- Inputs Column -->
+                <div class="lg:col-span-1 card p-4 h-fit">
+                    <h2 class="text-lg font-semibold mb-4 border-b border-gray-200 pb-3 text-gray-700">Client Assumptions</h2>
+                    <div id="input-container" class="space-y-4">
+                        <!-- Input fields will be generated by JS -->
+                    </div>
+                </div>
+
+                <!-- Results Column -->
+                <div class="lg:col-span-3 space-y-4 xl:space-y-6">
+                    <!-- Summary Analytics -->
+                    <div class="card p-4">
+                        <h2 class="text-lg font-semibold mb-3 border-b border-gray-200 pb-2 text-gray-700">Projected Outcomes</h2>
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 items-center">
+                            <div class="h-48 w-48 mx-auto">
+                                <canvas id="summaryChart"></canvas>
+                            </div>
+                            <div id="summary-details" class="space-y-2">
+                                <!-- Summary details will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Annual Projection Table -->
+                    <div class="card overflow-hidden">
+                         <h2 class="text-lg font-semibold p-4 border-b border-gray-200 text-gray-700">Annual Projection Details</h2>
+                        <div class="overflow-x-auto">
+                            <table class="projection-table text-xs">
+                                <thead id="projection-head"></thead>
+                                <tbody id="projection-body"></tbody>
+                            </table>
+                        </div>
+                        <div id="error-message" class="p-4 text-red-600 font-semibold hidden"></div>
+                    </div>
+
+                    <!-- Explanation Section -->
+                    <div class="card">
+                        <div class="p-6 flex justify-between items-center cursor-pointer" id="explanation-toggle">
+                            <h2 class="text-lg font-semibold text-gray-700">Understanding the Projection</h2>
+                            <svg id="explanation-arrow" class="w-6 h-6 text-gray-500 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                        <div id="explanation-content" class="explanation-content">
+                             <div class="px-6 pb-6 text-gray-600 space-y-6">
+                                <!-- Explanation content will be populated here -->
+                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="text-center p-6 text-gray-500 text-xs mt-8" style="font-size: 0.6rem;">
+        <p>This illustration is hypothetical and for informational purposes only. It is not intended as tax, legal, or financial advice. Projections are based on the assumptions provided and are not a guarantee of future results. Consult with a qualified professional before making any financial decisions.</p>
+    </footer>
+
+    <script>
+        // --- DATA & CONFIGURATION ---
+        const tooltips = {
+            useDAF: 'Toggle to model a pre-sale contribution to a Donor-Advised Fund (DAF), which avoids capital gains and provides an immediate tax deduction.',
+            dafContributionPercentage: 'The percentage of the total asset value to be donated to the DAF before the remainder is contributed to the CRUT.',
+            useNingTrust: 'Models the effect of using a Nevada Incomplete Gift Non-Grantor (NING) Trust to potentially avoid state income tax on CRUT distributions.',
+            residenceStateTaxRate: 'The client\'s state income tax rate (e.g., NJ, CA). This is used to calculate the potential tax savings from a NING Trust.',
+            ningStateTaxRate: 'The tax rate of the state where the NING trust is domiciled (typically 0% for states like Nevada or Delaware).',
+            includeNIIT: 'Toggle to include the 3.8% Net Investment Income Tax. For an active business sale, this may not apply, but a trust-based sale could trigger it. This is a critical variable for a professional to assess.',
+            niitThreshold: 'The modified adjusted gross income (MAGI) threshold above which the NIIT may apply.',
+            initialContribution: 'The fair market value of the asset(s) before any charitable contributions.',
+            assetBasis: 'The original purchase price of the contributed asset, used for calculating capital gains tax.',
+            grantorAge: 'The age of the income beneficiary at the time of the trust\'s creation.',
+            termType: 'Choose whether the trust lasts for a fixed number of years or for the grantor\'s lifetime (calculated based on IRS tables).',
+            trustTerm: 'The total duration of the trust in years (only applicable if "Term of Years" is selected).',
+            payoutRate: 'The fixed percentage of the trust\'s value paid out to the beneficiary each year.',
+            preFlipGrowthRate: 'The projected annual growth rate of the illiquid asset before the flip.',
+            postFlipIncomeYield: 'The portion of the total return generated as income (dividends, interest) after the flip.',
+            postFlipCapAppreciation: 'The portion of the total return from asset value growth after the flip.',
+            payoutSchedule: 'The frequency of payments to the beneficiary (e.g., Annual, Quarterly).',
+            flipTriggerYear: 'The year in which the trust converts from a NIMCRUT to a standard CRUT, allowing for full payouts.',
+            grantorOrdinaryTaxRate: 'The grantor\'s marginal income tax rate, used to calculate the value of the charitable deduction.',
+            capitalGainsTaxRate: 'The tax rate applied to the profit from selling the asset.',
+            clientManagementFee: 'An annual fee paid from the trust, typically to a trustee or advisor, calculated as a percentage of trust assets.',
+            additionalContributionAmount: 'A future, one-time contribution to the trust.',
+            additionalContributionYear: 'The year in which the additional contribution is made.',
+        };
+
+        const inputsConfig = [
+            // DAF Section
+            { id: 'useDAF', label: 'Use DAF Pre-Sale Strategy', type: 'toggle', value: false, section: 'DAF' },
+            { id: 'dafContributionPercentage', label: 'DAF Contribution %', type: 'slider', value: 10, min: 1, max: 30, step: 1, format: 'percent', dependsOn: 'useDAF' },
+            
+            // CRUT Section
+            { id: 'initialContribution', label: 'Total Asset Value', type: 'number', value: 10000000, min: 10000, max: 50000000, step: 10000, format: 'currency', section: 'CRUT' },
+            { id: 'assetBasis', label: 'Asset Basis', type: 'number', value: 200000, min: 0, max: 50000000, step: 10000, format: 'currency', section: 'CRUT' },
+            { id: 'grantorAge', label: 'Grantor Age', type: 'slider', value: 65, min: 20, max: 95, step: 1, format: 'integer', section: 'CRUT' },
+            { id: 'termType', label: 'Term Type', type: 'select', options: ['Term of Years', 'Life Expectancy'], value: 'Term of Years', section: 'CRUT' },
+            { id: 'trustTerm', label: 'Term of Years', type: 'slider', value: 20, min: 1, max: 40, step: 1, format: 'integer', section: 'CRUT', dependsOn: 'termType', dependsOnValue: 'Term of Years' },
+            { id: 'payoutRate', label: 'Payout Rate', type: 'slider', value: 7.50, min: 5, max: 15, step: 0.01, format: 'percent', section: 'CRUT' },
+            { id: 'preFlipGrowthRate', label: 'Pre-Flip Growth Rate', type: 'slider', value: 8.00, min: 0, max: 20, step: 0.01, format: 'percent', section: 'CRUT' },
+            { id: 'postFlipIncomeYield', label: 'Post-Flip Income Yield', type: 'slider', value: 2.00, min: 0, max: 15, step: 0.1, format: 'percent', section: 'CRUT' },
+            { id: 'postFlipCapAppreciation', label: 'Post-Flip Cap. Apprec.', type: 'slider', value: 6.00, min: 0, max: 15, step: 0.1, format: 'percent', section: 'CRUT' },
+            { id: 'flipTriggerYear', label: 'Flip Trigger Year', type: 'slider', value: 5, min: 1, max: 40, step: 1, format: 'integer', section: 'CRUT' },
+            { id: 'payoutSchedule', label: 'Payout Schedule', type: 'select', options: ['Annual', 'Semi-Annual', 'Quarterly', 'Monthly'], value: 'Annual', section: 'CRUT' },
+            { id: 'clientManagementFee', label: 'Management Fee', type: 'slider', value: 1.0, min: 0, max: 5, step: 0.01, format: 'percent', section: 'CRUT' },
+            { id: 'additionalContributionAmount', label: 'Additional Contribution Amt', type: 'number', value: 0, min: 0, max: 5000000, step: 10000, format: 'currency', section: 'CRUT' },
+            { id: 'additionalContributionYear', label: 'Year of Add. Contribution', type: 'slider', value: 5, min: 2, max: 40, step: 1, format: 'integer', section: 'CRUT' },
+            
+            // NING Trust & Tax Section
+            { id: 'useNingTrust', label: 'Use NING Trust Strategy', type: 'toggle', value: false, section: 'NING' },
+            { id: 'residenceStateTaxRate', label: 'Residence State Tax Rate', type: 'slider', value: 10.75, min: 0, max: 15, step: 0.01, format: 'percent', dependsOn: 'useNingTrust' },
+            { id: 'ningStateTaxRate', label: 'NING State Tax Rate', type: 'slider', value: 0, min: 0, max: 15, step: 0.1, format: 'percent', dependsOn: 'useNingTrust' },
+            { id: 'includeNIIT', label: 'Include NIIT on Sale', type: 'toggle', value: false, section: 'NING', dependsOn: 'useNingTrust' },
+            { id: 'niitThreshold', label: 'NIIT MAGI Threshold', type: 'number', value: 250000, min: 0, max: 1000000, step: 10000, format: 'currency', dependsOn: 'useNingTrust' },
+
+            // General Tax Section
+            { id: 'grantorOrdinaryTaxRate', label: 'Ordinary Tax Rate', type: 'slider', value: 37, min: 10, max: 50, step: 1, format: 'percent', section: 'Tax' },
+            { id: 'capitalGainsTaxRate', label: 'Capital Gains Tax Rate', type: 'slider', value: 20, min: 0, max: 30, step: 1, format: 'percent', section: 'Tax' },
+            { id: 'section_7520_rate', label: 'Section 7520 Rate', type: 'slider', value: 5.0, min: 0.2, max: 8, step: 0.2, format: 'percent', section: 'Tax' },
+        ];
+
+        let summaryChart = null;
+
+        // --- CORE CALCULATION LOGIC ---
+        function runModel(inputs) {
+            // Phase 0: Deconstruct Inputs & Initialize
+            let {
+                initialContribution, assetBasis, grantorAge, termType, trustTerm, payoutRate,
+                preFlipGrowthRate, postFlipIncomeYield, postFlipCapAppreciation,
+                flipTriggerYear, payoutSchedule, section_7520_rate, grantorOrdinaryTaxRate,
+                capitalGainsTaxRate, useDAF, dafContributionPercentage, useNingTrust,
+                residenceStateTaxRate, ningStateTaxRate, includeNIIT, niitThreshold,
+                clientManagementFee, additionalContributionAmount, additionalContributionYear
+            } = inputs;
+
+            // Life Expectancy Calculation
+            if (termType === 'Life Expectancy') {
+                const lifeExpectancyTable = { 20: 61, 25: 56, 30: 51, 35: 46, 40: 41, 45: 37, 50: 32, 55: 28, 60: 23, 65: 19, 70: 15, 75: 11, 80: 8, 85: 6, 90: 4, 95: 3 };
+                const closestAge = Object.keys(lifeExpectancyTable).reduce((prev, curr) => 
+                    (Math.abs(curr - grantorAge) < Math.abs(prev - grantorAge) ? curr : prev)
+                );
+                trustTerm = lifeExpectancyTable[closestAge];
+            }
+
+            const payout_rate_dec = payoutRate / 100;
+            const pre_flip_growth_rate_dec = preFlipGrowthRate / 100;
+            const post_flip_income_yield_dec = postFlipIncomeYield / 100;
+            const post_flip_cap_appreciation_dec = postFlipCapAppreciation / 100;
+            const section_7520_rate_dec = section_7520_rate / 100;
+            const grantor_ordinary_tax_rate_dec = grantorOrdinaryTaxRate / 100;
+            const capital_gains_tax_rate_dec = capitalGainsTaxRate / 100;
+            const residence_state_tax_rate_dec = residenceStateTaxRate / 100;
+            const client_management_fee_dec = clientManagementFee / 100;
+            const niit_rate = 0.038;
+
+            let dafDonationValue = 0;
+            let initialContributionForCRUT = initialContribution;
+            let avoidedCapitalGainsOnDAF = 0;
+            let dafTaxDeduction = 0;
+            let basisForCRUT = assetBasis;
+
+            // Phase 1: DAF Pre-Sale Calculations (Conditional)
+            if (useDAF) {
+                const daf_contribution_dec = dafContributionPercentage / 100;
+                dafDonationValue = initialContribution * daf_contribution_dec;
+                initialContributionForCRUT = initialContribution - dafDonationValue;
+                
+                const basisOfDAFPortion = assetBasis * daf_contribution_dec;
+                basisForCRUT = assetBasis - basisOfDAFPortion;
+
+                avoidedCapitalGainsOnDAF = (dafDonationValue - basisOfDAFPortion) * capital_gains_tax_rate_dec;
+                dafTaxDeduction = dafDonationValue;
+            }
+            
+            const upfrontTaxSavingsFromDAF = dafTaxDeduction * grantor_ordinary_tax_rate_dec;
+
+            // Phase 2: FLIP-NIMCRUT & NING Trust Projection
+            const payout_frequency_factors = { 'Annual': 1.0000, 'Semi-Annual': 0.9878, 'Quarterly': 0.9758, 'Monthly': 0.9642 };
+            const payout_frequency_factor = payout_frequency_factors[payoutSchedule];
+            const adjusted_payout_rate = payout_rate_dec * payout_frequency_factor;
+
+            const calculateCharitableRemainderFactor = (age, term, adj_payout, rate_7520) => {
+                const pv_annuity_factor = (1 - Math.pow(1 + rate_7520, -term)) / rate_7520;
+                const beneficiary_interest = pv_annuity_factor * adj_payout;
+                let remainder_factor = Math.max(0, 1 - beneficiary_interest);
+                const age_adjustment = (age - 65) * 0.002;
+                return Math.min(0.95, Math.max(0.1, remainder_factor + age_adjustment));
+            };
+            
+            const charitable_remainder_factor = calculateCharitableRemainderFactor(grantorAge, trustTerm, adjusted_payout_rate, section_7520_rate_dec);
+            const present_value_of_remainder = initialContributionForCRUT * charitable_remainder_factor;
+
+            if ((present_value_of_remainder / initialContributionForCRUT) < 0.10) {
+                return { error: `Error: CRUT fails the 10% remainder test. Remainder is only ${((present_value_of_remainder / initialContributionForCRUT) * 100).toFixed(2)}%. Try lowering the Payout Rate or increasing the Trust Term.` };
+            }
+
+            const crutTaxDeduction = present_value_of_remainder;
+            const upfrontTaxSavingsFromCRUT = crutTaxDeduction * grantor_ordinary_tax_rate_dec;
+
+            let oneTimeNiitPaid = 0;
+            if (useNingTrust && includeNIIT) {
+                const totalGainInCRUT = initialContributionForCRUT - basisForCRUT;
+                oneTimeNiitPaid = totalGainInCRUT * niit_rate;
+            }
+
+            const projection_data = [];
+            let makeup_owed = 0.0;
+            let begin_value = initialContributionForCRUT;
+            let totalStateTaxSaved = 0;
+            let cumulativeClientFees = 0;
+
+            for (let year = 1; year <= trustTerm; year++) {
+                if (year === additionalContributionYear) {
+                    begin_value += additionalContributionAmount;
+                }
+
+                const client_fee_paid = begin_value * client_management_fee_dec;
+                cumulativeClientFees += client_fee_paid;
+                
+                // Corrected Logic: Base for growth is net of fees for a more conservative projection.
+                const growth_base = begin_value - client_fee_paid;
+
+                let income_generated, appreciation;
+                if (year < flipTriggerYear) {
+                    income_generated = 0;
+                    appreciation = growth_base * pre_flip_growth_rate_dec;
+                } else {
+                    income_generated = growth_base * post_flip_income_yield_dec;
+                    appreciation = growth_base * post_flip_cap_appreciation_dec;
+                }
+                const growth = income_generated + appreciation;
+                
+                const unitrust_amount = begin_value * payout_rate_dec;
+                
+                let actual_payment, makeup_paid_this_year = 0;
+                const makeup_owed_this_year = Math.max(0, unitrust_amount - income_generated);
+
+                if (year < flipTriggerYear) {
+                    makeup_owed += makeup_owed_this_year;
+                    actual_payment = income_generated;
+                } else if (year === flipTriggerYear) {
+                    makeup_paid_this_year = makeup_owed + makeup_owed_this_year;
+                    actual_payment = unitrust_amount + makeup_paid_this_year;
+                    makeup_owed = 0;
+                } else { 
+                    makeup_owed = 0;
+                    actual_payment = unitrust_amount;
+                }
+                
+                let stateTaxSavedForYear = 0;
+                if (useNingTrust) {
+                    stateTaxSavedForYear = actual_payment * residence_state_tax_rate_dec;
+                    totalStateTaxSaved += stateTaxSavedForYear;
+                }
+                
+                const end_value = begin_value + growth - actual_payment - client_fee_paid;
+
+                projection_data.push({
+                    "Year": year,
+                    "Grantor Age": grantorAge + year - 1,
+                    "Begin Value": begin_value,
+                    "Growth": growth,
+                    "Annual Payment Amount": unitrust_amount,
+                    "Client Fee Paid": client_fee_paid,
+                    "Actual Payment Made": actual_payment,
+                    "State Tax Saved": stateTaxSavedForYear,
+                    "Cumulative Make-Up Owed": makeup_owed,
+                    "End Value": end_value,
+                });
+                begin_value = end_value;
+            }
+
+            // Phase 3: Final Reporting & Summary
+            const totalPaymentsToGrantor = projection_data.reduce((sum, row) => sum + row["Actual Payment Made"], 0);
+            const remainderToCharity = projection_data.length > 0 ? projection_data[projection_data.length - 1]["End Value"] : 0;
+            const upfrontTaxSavings = upfrontTaxSavingsFromDAF + upfrontTaxSavingsFromCRUT;
+
+            const totalBenefit = totalPaymentsToGrantor + totalStateTaxSaved - oneTimeNiitPaid + upfrontTaxSavings + avoidedCapitalGainsOnDAF;
+
+            const summary_report = {
+                "Total Benefit of Strategy": totalBenefit,
+                "Total Payments to Grantor": totalPaymentsToGrantor,
+                "Projected Remainder to Charity": remainderToCharity,
+                "Total Upfront Tax Savings": upfrontTaxSavings,
+                "Avoided Cap. Gains (DAF)": avoidedCapitalGainsOnDAF,
+                "Total State Tax Saved (NING)": totalStateTaxSaved,
+                "One-Time NIIT Paid (Trust)": oneTimeNiitPaid,
+                "Total Client Fees Paid": cumulativeClientFees,
+                "Initial DAF Deduction": dafTaxDeduction,
+                "Initial CRUT Deduction": crutTaxDeduction,
+                "Calculated Trust Term": trustTerm,
+            };
+            return { projection_data, summary_report };
+        }
+
+        // --- UI & DOM MANIPULATION ---
+        const inputContainer = document.getElementById('input-container');
+        const summaryDetailsEl = document.getElementById('summary-details');
+        const projectionHeadEl = document.getElementById('projection-head');
+        const projectionBodyEl = document.getElementById('projection-body');
+        const errorMessageEl = document.getElementById('error-message');
+
+        const formatters = {
+            currency: (val) => `$${val.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`,
+            percent: (val) => `${val.toFixed(2)}%`,
+            integer: (val) => `${val}`
+        };
+
+        function createInputs() {
+            inputsConfig.forEach(config => {
+                const group = document.createElement('div');
+                group.id = `group-${config.id}`;
+                if (config.dependsOn) {
+                    group.classList.add('pl-4', 'border-l-2', 'border-indigo-100');
+                }
+
+                if (config.type === 'toggle') {
+                    group.className = 'flex items-center justify-between pt-2';
+                    const label = document.createElement('span');
+                    label.className = 'text-xs font-medium text-gray-700';
+                    label.innerHTML = `${config.label} <span class="info-icon" title="${tooltips[config.id] || ''}">&#9432;</span>`;
+                    const toggleContainer = document.createElement('div');
+                    toggleContainer.className = 'relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in';
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.id = config.id;
+                    checkbox.checked = config.value;
+                    checkbox.className = 'toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer';
+                    checkbox.addEventListener('change', updateModel);
+                    const labelForCheckbox = document.createElement('label');
+                    labelForCheckbox.htmlFor = config.id;
+                    labelForCheckbox.className = 'toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer';
+                    toggleContainer.appendChild(checkbox);
+                    toggleContainer.appendChild(labelForCheckbox);
+                    group.appendChild(label);
+                    group.appendChild(toggleContainer);
+                } else {
+                    const label = document.createElement('label');
+                    label.htmlFor = config.id;
+                    label.className = 'block text-xs font-medium text-gray-700 mb-1';
+                    
+                    const labelText = document.createElement('span');
+                    labelText.textContent = config.label;
+                    label.appendChild(labelText);
+
+                    const infoIcon = `<span class="info-icon" title="${tooltips[config.id] || ''}">&#9432;</span>`;
+                    label.innerHTML += infoIcon;
+
+                    const valueSpan = document.createElement('span');
+                    valueSpan.id = `${config.id}-value`;
+                    valueSpan.className = 'float-right font-semibold text-indigo-800 text-xs';
+                    label.appendChild(valueSpan);
+                    group.appendChild(label);
+
+                    if (config.type === 'select') {
+                        const select = document.createElement('select');
+                        select.id = config.id;
+                        select.className = 'w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 bg-white text-xs';
+                        config.options.forEach(opt => {
+                            const option = document.createElement('option');
+                            option.value = opt;
+                            option.textContent = opt;
+                            if (opt === config.value) option.selected = true;
+                            select.appendChild(option);
+                        });
+                        select.addEventListener('change', updateModel);
+                        group.appendChild(select);
+                    } else if (config.type === 'slider') {
+                        const slider = document.createElement('input');
+                        slider.type = 'range';
+                        slider.id = config.id;
+                        slider.min = config.min;
+                        slider.max = config.max;
+                        slider.step = config.step;
+                        slider.value = config.value;
+                        slider.className = 'w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-track';
+                        slider.addEventListener('input', updateModel);
+                        group.appendChild(slider);
+                    } else { // number
+                        const input = document.createElement('input');
+                        input.type = 'number';
+                        input.id = config.id;
+                        input.value = config.value;
+                        input.className = 'w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-xs';
+                        input.addEventListener('input', updateModel);
+                        group.appendChild(input);
+                    }
+                }
+                inputContainer.appendChild(group);
+            });
+        }
+
+        function updateModel() {
+            const currentInputs = {};
+            inputsConfig.forEach(config => {
+                const el = document.getElementById(config.id);
+                if (config.type === 'toggle') {
+                    currentInputs[config.id] = el.checked;
+                } else if (config.type === 'select' || config.type === 'date') {
+                    currentInputs[config.id] = el.value;
+                } else {
+                    currentInputs[config.id] = parseFloat(el.value);
+                    const valueSpan = document.getElementById(`${config.id}-value`);
+                    if (valueSpan) {
+                         if (config.format === 'percent') {
+                            valueSpan.textContent = `${parseFloat(el.value).toFixed(2)}%`;
+                        } else {
+                            valueSpan.textContent = formatters[config.format](currentInputs[config.id]);
+                        }
+                    }
+                }
+            });
+
+            // UI Logic for conditional fields
+            inputsConfig.forEach(config => {
+                if (config.dependsOn) {
+                    const group = document.getElementById(`group-${config.id}`);
+                    const controller = document.getElementById(config.dependsOn);
+                    let shouldShow = false;
+                    if (controller.type === 'checkbox') {
+                        shouldShow = controller.checked;
+                    } else if (controller.type === 'select-one') {
+                        shouldShow = controller.value === config.dependsOnValue;
+                    }
+                    
+                    if (shouldShow) {
+                        group.classList.remove('hidden');
+                    } else {
+                        group.classList.add('hidden');
+                    }
+                }
+            });
+            
+            const result = runModel(currentInputs);
+            
+            if (result.error) {
+                document.getElementById('summary-details').innerHTML = '';
+                if(summaryChart) summaryChart.destroy();
+                projectionHeadEl.innerHTML = '';
+                projectionBodyEl.innerHTML = '';
+                errorMessageEl.textContent = result.error;
+                errorMessageEl.classList.remove('hidden');
+            } else {
+                errorMessageEl.classList.add('hidden');
+                // Update slider max values based on calculated term
+                document.getElementById('flipTriggerYear').max = result.summary_report["Calculated Trust Term"];
+                document.getElementById('additionalContributionYear').max = result.summary_report["Calculated Trust Term"];
+
+                renderSummary(result.summary_report, currentInputs);
+                renderProjection(result.projection_data, currentInputs);
+            }
+        }
+
+        function renderSummary(summary, inputs) {
+            const chartData = {
+                labels: ['Payments to Grantor', 'Remainder to Charity', 'Total Tax Savings'],
+                datasets: [{
+                    data: [
+                        summary['Total Payments to Grantor'],
+                        summary['Projected Remainder to Charity'],
+                        summary['Total Upfront Tax Savings'] + summary['Total State Tax Saved (NING)'] + summary['Avoided Cap. Gains (DAF)']
+                    ],
+                    backgroundColor: ['#303f9f', '#ffc107', '#7e57c2'], // Navy, Gold, Purple
+                    hoverBackgroundColor: ['#1a237e', '#ffa000', '#5e35b1'],
+                    borderColor: '#fff',
+                    borderWidth: 2,
+                }]
+            };
+
+            const ctx = document.getElementById('summaryChart').getContext('2d');
+            if (summaryChart) {
+                summaryChart.destroy();
+            }
+            summaryChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: chartData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '60%',
+                    plugins: {
+                        legend: { position: 'bottom', labels: { font: { size: 10 }, boxWidth: 12, padding: 10 } },
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => `${context.label || ''}: ${formatters.currency(context.parsed)}`
+                            }
+                        }
+                    }
+                }
+            });
+            
+            let termDisplay = inputs.termType === 'Life Expectancy' ? `Life Expectancy (${summary['Calculated Trust Term']} Yrs)` : `${summary['Calculated Trust Term']} Years`;
+
+            summaryDetailsEl.innerHTML = `
+                <div class="flex justify-between items-center bg-green-50 p-3 rounded-lg">
+                    <span class="font-medium text-gray-700 text-sm">Total Benefit of Strategy</span>
+                    <span class="font-bold text-lg text-green-700">${formatters.currency(summary['Total Benefit of Strategy'])}</span>
+                </div>
+                <div class="flex justify-between items-center bg-gray-50 p-2 rounded-lg">
+                    <span class="font-medium text-gray-600 text-xs">Trust Term</span>
+                    <span class="font-semibold text-sm text-gray-800">${termDisplay}</span>
+                </div>
+                <div class="flex justify-between items-center bg-gray-50 p-2 rounded-lg">
+                    <span class="font-medium text-gray-600 text-xs">Total Payments to Grantor</span>
+                    <span class="font-semibold text-sm text-gray-800">${formatters.currency(summary['Total Payments to Grantor'])}</span>
+                </div>
+                <div class="flex justify-between items-center bg-gray-50 p-2 rounded-lg">
+                    <span class="font-medium text-gray-600 text-xs">Total Client Fees Paid</span>
+                    <span class="font-semibold text-sm text-red-600">${formatters.currency(summary['Total Client Fees Paid'])}</span>
+                </div>
+                <div class="flex justify-between items-center bg-gray-50 p-2 rounded-lg">
+                    <span class="font-medium text-gray-600 text-xs">Remainder to Charity</span>
+                    <span class="font-semibold text-sm text-yellow-600">${formatters.currency(summary['Projected Remainder to Charity'])}</span>
+                </div>
+                <div class="flex justify-between items-center bg-purple-50 p-2 rounded-lg">
+                    <span class="font-medium text-gray-600 text-xs">Total Upfront Tax Savings</span>
+                    <span class="font-semibold text-sm text-purple-600">${formatters.currency(summary['Total Upfront Tax Savings'])}</span>
+                </div>
+                 ${inputs.useDAF ? `
+                 <div class="flex justify-between items-center bg-gray-50 p-2 rounded-lg ml-4 border-l-2">
+                    <span class="font-medium text-gray-500 text-xs">Avoided Cap. Gains (DAF)</span>
+                    <span class="font-semibold text-sm text-green-600">${formatters.currency(summary['Avoided Cap. Gains (DAF)'])}</span>
+                </div>` : ''}
+                ${inputs.useNingTrust ? `
+                <div class="flex justify-between items-center bg-gray-50 p-2 rounded-lg ml-4 border-l-2">
+                    <span class="font-medium text-gray-500 text-xs">Total State Tax Saved (NING)</span>
+                    <span class="font-semibold text-sm text-blue-600">${formatters.currency(summary['Total State Tax Saved (NING)'])}</span>
+                </div>
+                <div class="flex justify-between items-center bg-red-50 p-2 rounded-lg ml-4 border-l-2">
+                    <span class="font-medium text-gray-500 text-xs">One-Time NIIT Paid</span>
+                    <span class="font-semibold text-sm text-red-600">${formatters.currency(summary['One-Time NIIT Paid (Trust)'])}</span>
+                </div>` : ''}
+            `;
+        }
+
+        function renderProjection(data, currentInputs) {
+            if (!data || data.length === 0) return;
+            
+            projectionHeadEl.innerHTML = '';
+            const headerRow = document.createElement('tr');
+            Object.keys(data[0]).forEach(key => {
+                if (!currentInputs.useNingTrust && key === 'State Tax Saved') return;
+                const th = document.createElement('th');
+                th.className = 'header-cell';
+                th.title = tooltips[key] || '';
+                th.textContent = key.replace(/_/g, ' ');
+                headerRow.appendChild(th);
+            });
+            projectionHeadEl.appendChild(headerRow);
+
+            projectionBodyEl.innerHTML = '';
+            data.forEach((row, index) => {
+                const tr = document.createElement('tr');
+                
+                if (row.Year === currentInputs.flipTriggerYear) {
+                    tr.className = 'bg-yellow-100 font-semibold';
+                } else if (index === data.length - 1) {
+                    tr.className = 'bg-blue-100 font-semibold';
+                } else if (index % 2 === 0) {
+                    tr.className = 'bg-white';
+                } else {
+                    tr.className = 'bg-gray-50/50';
+                }
+
+                if (row.Year === currentInputs.additionalContributionYear) {
+                    tr.classList.add('border-t-2', 'border-blue-300');
+                }
+
+                Object.entries(row).forEach(([key, value]) => {
+                    if (!currentInputs.useNingTrust && key === 'State Tax Saved') return;
+                    const td = document.createElement('td');
+                    td.className = 'table-cell';
+                    
+                    if (key.includes('Year') || key.includes('Age')) {
+                        td.textContent = formatters.integer(value);
+                    } else {
+                        td.textContent = formatters.currency(value);
+                    }
+                    tr.appendChild(td);
+                });
+                projectionBodyEl.appendChild(tr);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const contentWrapper = document.querySelector('#explanation-content > div');
+            
+            createInputs();
+            updateModel();
+            
+            const toggle = document.getElementById('explanation-toggle');
+            const content = document.getElementById('explanation-content');
+            const arrow = document.getElementById('explanation-arrow');
+            const explanationHTML = `
+                <div class="explanation-card" style="border-color: #303f9f;">
+                    <div class="flex items-center mb-2">
+                        <svg class="w-6 h-6 mr-3 text-indigo-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                        <h4 class="font-semibold text-lg text-gray-800">Core Strategy: The FLIP NIM-CRUT</h4>
+                    </div>
+                    <p class="text-xs text-gray-600 mb-3">A FLIP NIM-CRUT is a specialized trust designed to solve a specific problem: how to generate tax benefits and future income from a highly appreciated, non-income-producing asset (like private stock or real estate) without triggering a massive upfront tax bill.</p>
+                    <div class="space-y-2 text-xs">
+                        <p><b>Act I: The Growth Phase (Pre-Flip).</b> The illiquid asset is placed in the trust. Since it generates no cash, the trust pays no income. However, the unpaid amount is tracked in a "make-up" account. The key benefit here is that the asset grows in a <b>tax-exempt environment</b>, maximizing its potential before the sale.</p>
+                        <p><b>Act II: The Liquidity Event (The "Flip").</b> In the designated "flip year," the asset is sold. This floods the trust with cash, which is considered "income." The trust then makes a large, one-time distribution to you, consisting of the standard payout for that year PLUS the entire accumulated make-up balance.</p>
+                        <p><b>Act III: The Income Phase (Post-Flip).</b> The trust now operates as a standard CRUT. The cash proceeds are reinvested into a diversified portfolio, providing you with a steady, predictable income stream for the rest of the trust's term.</p>
+                    </div>
+                </div>
+
+                <div class="explanation-card" style="border-color: #7e57c2;">
+                     <div class="flex items-center mb-2">
+                        <svg class="w-6 h-6 mr-3 text-purple-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"></path></svg>
+                        <h4 class="font-semibold text-lg text-gray-800">Strategy Layer 1: Donor-Advised Fund (DAF)</h4>
+                    </div>
+                    <p class="text-xs text-gray-600">This is a powerful "front-end" strategy. By donating a portion of your asset to a DAF *before* the sale, you achieve two significant benefits: <b>(1)</b> The donated portion is removed from your ownership, so you completely and permanently <b>avoid capital gains tax</b> on its appreciation. <b>(2)</b> You receive an immediate <b>income tax deduction</b> for the full fair market value of the donation, which can be used to offset other income (subject to AGI limits).</p>
+                </div>
+
+                <div class="explanation-card" style="border-color: #1e88e5;">
+                     <div class="flex items-center mb-2">
+                        <svg class="w-6 h-6 mr-3 text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                        <h4 class="font-semibold text-lg text-gray-800">Strategy Layer 2: NING Trust</h4>
+                    </div>
+                    <p class="text-xs text-gray-600">This is a sophisticated state tax arbitrage strategy. For clients in high-tax states like California or New Jersey, a NING Trust can be established in a zero-tax state like Nevada. By routing the CRUT income payments through the NING trust, you can potentially <b>eliminate state income tax</b> on those distributions. This model also includes a critical toggle for the <b>3.8% Net Investment Income Tax (NIIT)</b>. While the sale of an active business is often exempt, a sale within a trust structure might trigger this tax, making it a crucial variable that requires professional analysis.</p>
+                </div>
+            `;
+            contentWrapper.innerHTML = explanationHTML;
+
+            toggle.addEventListener('click', () => {
+                if (content.style.maxHeight) {
+                    content.style.maxHeight = null;
+                    arrow.style.transform = 'rotate(0deg)';
+                } else {
+                    content.style.maxHeight = content.scrollHeight + "px";
+                    arrow.style.transform = 'rotate(180deg)';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
