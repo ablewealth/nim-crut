@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,15 +14,19 @@
             background-color: #f8f9fa;
             font-size: 0.875rem;
         }
+
         .header {
-            background-color: #1a237e; /* Deep Navy Blue */
+            background-color: #1a237e;
+            /* Deep Navy Blue */
         }
+
         .card {
             background-color: white;
             border-radius: 0.75rem;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
             transition: all 0.3s ease-in-out;
         }
+
         .slider-thumb {
             -webkit-appearance: none;
             appearance: none;
@@ -33,6 +38,7 @@
             border: 3px solid white;
             box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.2);
         }
+
         .slider-thumb::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
@@ -44,6 +50,7 @@
             border: 3px solid white;
             box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.2);
         }
+
         .table-cell {
             padding: 0.375rem 0.5rem;
             text-align: right;
@@ -52,6 +59,7 @@
             font-size: 0.7rem;
             line-height: 1.2;
         }
+
         .header-cell {
             padding: 0.5rem 0.5rem;
             text-align: right;
@@ -63,30 +71,40 @@
             top: 0;
             z-index: 10;
             font-size: 0.7rem;
-            line-height: 1.2; /* Adjusted for wrapping */
-            white-space: normal; /* Allow wrapping */
+            line-height: 1.2;
+            /* Adjusted for wrapping */
+            white-space: normal;
+            /* Allow wrapping */
         }
+
         .projection-table {
             width: 100%;
             table-layout: fixed;
         }
-        .projection-table th, .projection-table td {
+
+        .projection-table th,
+        .projection-table td {
             overflow: hidden;
             text-overflow: ellipsis;
         }
+
         @media (max-width: 1280px) {
             .projection-table {
                 min-width: 1200px;
             }
         }
+
         .toggle-checkbox:checked {
             right: 0;
             border-color: #1a237e;
         }
-        .toggle-checkbox:checked + .toggle-label {
+
+        .toggle-checkbox:checked+.toggle-label {
             background-color: #1a237e;
         }
-        select, input[type="date"] {
+
+        select,
+        input[type="date"] {
             -webkit-appearance: none;
             -moz-appearance: none;
             appearance: none;
@@ -94,9 +112,11 @@
             background-position: right .7em top 50%;
             background-size: .65em auto;
         }
+
         select {
-             background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23007CB2%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E');
+            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23007CB2%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E');
         }
+
         .info-icon {
             display: inline-block;
             width: 1rem;
@@ -105,31 +125,356 @@
             color: #90a4ae;
             cursor: help;
         }
+
         .explanation-content {
             max-height: 0;
             overflow: hidden;
             transition: max-height 0.5s ease-in-out;
         }
+
         .explanation-card {
             background-color: #f8f9fa;
             border-left: 4px solid #4a5568;
             padding: 1rem;
             border-radius: 0.5rem;
         }
+
+        /* Print Styles */
+        @media print {
+            body {
+                font-size: 8pt;
+                line-height: 1.2;
+                color: #000;
+                background: white;
+                margin: 0;
+                padding: 0;
+            }
+
+            .header {
+                background-color: #1a237e !important;
+                -webkit-print-color-adjust: exact;
+                color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .no-print {
+                display: none !important;
+            }
+
+            .print-only {
+                display: block !important;
+            }
+
+            .card {
+                box-shadow: none;
+                border: 1px solid #e2e8f0;
+                page-break-inside: avoid;
+                margin-bottom: 1rem;
+            }
+
+            .grid {
+                display: block !important;
+            }
+
+            .lg\\:col-span-1,
+            .lg\\:col-span-3 {
+                width: 100% !important;
+                margin-bottom: 1rem;
+            }
+
+            .projection-table {
+                font-size: 6pt;
+                width: 100%;
+                table-layout: auto;
+            }
+
+            .table-cell,
+            .header-cell {
+                padding: 0.15rem 0.2rem;
+                font-size: 6pt;
+                border: 1px solid #ccc;
+            }
+
+            .header-cell {
+                background-color: #f8f9fa !important;
+                -webkit-print-color-adjust: exact;
+                font-weight: bold;
+            }
+
+            canvas {
+                max-width: 200px !important;
+                max-height: 200px !important;
+            }
+
+            .page-break {
+                page-break-before: always;
+            }
+
+            .print-header {
+                text-align: center;
+                margin-bottom: 1rem;
+                border-bottom: 3px solid #1a237e;
+                padding: 1rem;
+                background-color: #f8f9fa !important;
+                -webkit-print-color-adjust: exact;
+                margin: -1rem -1rem 1rem -1rem;
+            }
+
+            .print-header h1 {
+                font-size: 14pt !important;
+                margin-bottom: 0.25rem !important;
+            }
+
+            .print-header h2 {
+                font-size: 11pt !important;
+                margin-bottom: 0.25rem !important;
+            }
+
+            .print-header p {
+                font-size: 8pt !important;
+                margin: 0.25rem 0 !important;
+            }
+
+            .print-summary-section {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 1.5rem;
+                margin-bottom: 1rem;
+                align-items: start;
+            }
+
+            .print-assumptions {
+                background-color: #f8f9fa !important;
+                -webkit-print-color-adjust: exact;
+                padding: 0.5rem;
+                border: 1px solid #ddd;
+                border-radius: 0.25rem;
+                font-size: 6pt;
+            }
+
+            .print-assumptions h3 {
+                font-size: 8pt !important;
+                margin-bottom: 0.25rem !important;
+                color: #1a237e !important;
+                font-weight: bold !important;
+            }
+
+            .assumptions-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 0.5rem;
+                font-size: 6pt;
+            }
+
+            .assumption-section {
+                margin-bottom: 0.25rem;
+            }
+
+            .assumption-section h4 {
+                font-size: 6pt;
+                font-weight: bold;
+                color: #1a237e;
+                margin-bottom: 0.15rem;
+                border-bottom: 1px solid #ddd;
+                padding-bottom: 0.05rem;
+            }
+
+            .assumption-item {
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 0.05rem;
+                font-size: 6pt;
+            }
+
+            .assumption-label {
+                color: #555;
+            }
+
+            .assumption-value {
+                font-weight: 600;
+                color: #000;
+            }
+
+            .print-disclaimer {
+                font-size: 7pt;
+                margin-top: 1.5rem;
+                padding-top: 1rem;
+                border-top: 1px solid #ccc;
+                color: #666;
+                page-break-inside: avoid;
+            }
+
+            .summary-chart-container {
+                text-align: center;
+                margin-bottom: 1rem;
+            }
+
+            .summary-details-print {
+                font-size: 8pt;
+            }
+
+            .summary-details-print {
+                font-size: 6pt;
+            }
+
+            .summary-details-print .flex {
+                font-size: 6pt !important;
+            }
+
+            .summary-details-print .text-lg {
+                font-size: 8pt !important;
+            }
+
+            .summary-details-print .text-sm {
+                font-size: 6pt !important;
+            }
+
+            .summary-details-print .text-xs {
+                font-size: 5pt !important;
+            }
+
+            /* Make explanation content visible in print */
+            #explanation-content {
+                display: block !important;
+                max-height: none !important;
+                page-break-before: always;
+            }
+
+            .explanation-card {
+                background-color: #f8f9fa !important;
+                -webkit-print-color-adjust: exact;
+                border-left: 3px solid #1a237e !important;
+                padding: 0.5rem;
+                margin-bottom: 0.75rem;
+                border-radius: 0.25rem;
+                page-break-inside: avoid;
+            }
+
+            .explanation-card h4 {
+                font-size: 8pt !important;
+                font-weight: bold !important;
+                color: #1a237e !important;
+                margin-bottom: 0.25rem !important;
+            }
+
+            .explanation-card p {
+                font-size: 6pt !important;
+                line-height: 1.3 !important;
+                margin-bottom: 0.25rem !important;
+                color: #333 !important;
+            }
+
+            .explanation-card b {
+                font-weight: bold !important;
+            }
+
+            .explanation-card svg {
+                display: none !important;
+            }
+
+            .print-disclaimer h4 {
+                font-size: 7pt !important;
+                font-weight: bold !important;
+                margin-bottom: 0.25rem !important;
+            }
+
+            .print-disclaimer p {
+                font-size: 6pt !important;
+                margin-bottom: 0.25rem !important;
+            }
+
+            /* Hide all input controls in print */
+            input,
+            select,
+            button,
+            .toggle-checkbox,
+            .toggle-label,
+            input[type="range"],
+            input[type="number"],
+            input[type="checkbox"] {
+                display: none !important;
+            }
+
+            /* Hide explanation toggle elements in print */
+            #explanation-toggle {
+                display: none !important;
+            }
+
+            #explanation-arrow {
+                display: none !important;
+            }
+        }
+
+        .print-only {
+            display: none;
+        }
+
+        .print-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background-color: #1a237e;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: 600;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .print-button:hover {
+            background-color: #0f1654;
+            transform: translateY(-1px);
+        }
     </style>
 </head>
+
 <body class="text-gray-800 text-sm">
+
+    <!-- Print Button -->
+    <button class="print-button no-print" onclick="generatePrintReport()">
+        <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z">
+            </path>
+        </svg>
+        Print Report
+    </button>
 
     <!-- Header -->
     <header class="header text-white p-4 shadow-md">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
             <div class="flex items-center space-x-3">
-                <svg class="w-8 h-8 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                <svg class="w-8 h-8 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z">
+                    </path>
+                </svg>
                 <h1 class="text-lg font-bold">Able Wealth Management</h1>
             </div>
             <span class="text-xs opacity-80">Advanced Charitable Strategy Illustrator</span>
         </div>
     </header>
+
+    <!-- Print-Only Header -->
+    <div class="print-only print-header">
+        <h1 style="font-size: 18pt; font-weight: bold; color: #1a237e; margin-bottom: 0.5rem;">
+            Able Wealth Management
+        </h1>
+        <h2 style="font-size: 14pt; color: #4a5568; margin-bottom: 0.5rem;">
+            Charitable Giving Strategy Illustration
+        </h2>
+        <p style="font-size: 10pt; color: #666;">
+            FLIP NIM-CRUT, DAF & NING Trust Analysis
+        </p>
+        <p style="font-size: 9pt; color: #666; margin-top: 1rem;">
+            Report Generated: <span id="print-date"></span>
+        </p>
+    </div>
 
     <main class="p-2 sm:p-4 lg:p-6">
         <div class="max-w-full mx-auto px-2">
@@ -138,7 +483,8 @@
 
                 <!-- Inputs Column -->
                 <div class="lg:col-span-1 card p-4 h-fit">
-                    <h2 class="text-lg font-semibold mb-4 border-b border-gray-200 pb-3 text-gray-700">Client Assumptions</h2>
+                    <h2 class="text-lg font-semibold mb-4 border-b border-gray-200 pb-3 text-gray-700">Client
+                        Assumptions</h2>
                     <div id="input-container" class="space-y-4">
                         <!-- Input fields will be generated by JS -->
                     </div>
@@ -148,20 +494,30 @@
                 <div class="lg:col-span-3 space-y-4 xl:space-y-6">
                     <!-- Summary Analytics -->
                     <div class="card p-4">
-                        <h2 class="text-lg font-semibold mb-3 border-b border-gray-200 pb-2 text-gray-700">Projected Outcomes</h2>
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 items-center">
-                            <div class="h-48 w-48 mx-auto">
+                        <h2 class="text-lg font-semibold mb-3 border-b border-gray-200 pb-2 text-gray-700">Projected
+                            Outcomes</h2>
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 items-center print-summary-section">
+                            <div class="h-48 w-48 mx-auto summary-chart-container">
                                 <canvas id="summaryChart"></canvas>
                             </div>
-                            <div id="summary-details" class="space-y-2">
+                            <div id="summary-details" class="space-y-2 summary-details-print">
                                 <!-- Summary details will be populated here -->
                             </div>
                         </div>
                     </div>
-                    
+
+                    <!-- Print-Only Client Assumptions -->
+                    <div class="print-only print-assumptions">
+                        <h3>Client Assumptions & Strategy Parameters</h3>
+                        <div id="print-assumptions-content" class="assumptions-grid">
+                            <!-- Assumptions will be populated here -->
+                        </div>
+                    </div>
+
                     <!-- Annual Projection Table -->
                     <div class="card overflow-hidden">
-                         <h2 class="text-lg font-semibold p-4 border-b border-gray-200 text-gray-700">Annual Projection Details</h2>
+                        <h2 class="text-lg font-semibold p-4 border-b border-gray-200 text-gray-700">Annual Projection
+                            Details</h2>
                         <div class="overflow-x-auto">
                             <table class="projection-table text-xs">
                                 <thead id="projection-head"></thead>
@@ -175,12 +531,17 @@
                     <div class="card">
                         <div class="p-6 flex justify-between items-center cursor-pointer" id="explanation-toggle">
                             <h2 class="text-lg font-semibold text-gray-700">Understanding the Projection</h2>
-                            <svg id="explanation-arrow" class="w-6 h-6 text-gray-500 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                            <svg id="explanation-arrow" class="w-6 h-6 text-gray-500 transform transition-transform"
+                                fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 9l-7 7-7-7"></path>
+                            </svg>
                         </div>
                         <div id="explanation-content" class="explanation-content">
-                             <div class="px-6 pb-6 text-gray-600 space-y-6">
+                            <div class="px-6 pb-6 text-gray-600 space-y-6">
                                 <!-- Explanation content will be populated here -->
-                             </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -189,8 +550,37 @@
     </main>
 
     <footer class="text-center p-6 text-gray-500 text-xs mt-8" style="font-size: 0.6rem;">
-        <p>This illustration is hypothetical and for informational purposes only. It is not intended as tax, legal, or financial advice. Projections are based on the assumptions provided and are not a guarantee of future results. Consult with a qualified professional before making any financial decisions.</p>
+        <p>This illustration is hypothetical and for informational purposes only. It is not intended as tax, legal, or
+            financial advice. Projections are based on the assumptions provided and are not a guarantee of future
+            results. Consult with a qualified professional before making any financial decisions.</p>
     </footer>
+
+    <!-- Print-Only Disclaimer -->
+    <div class="print-only print-disclaimer">
+        <h4 style="font-weight: bold; margin-bottom: 0.5rem;">Important Disclaimers</h4>
+        <p style="margin-bottom: 0.5rem;">
+            <strong>Hypothetical Illustration:</strong> This analysis is hypothetical and for informational purposes
+            only. It is not intended as tax, legal, or financial advice. Actual results may vary significantly from
+            these projections.
+        </p>
+        <p style="margin-bottom: 0.5rem;">
+            <strong>Professional Consultation Required:</strong> The strategies illustrated involve complex tax and
+            legal considerations. Consult with qualified tax, legal, and financial professionals before implementing any
+            charitable giving strategy.
+        </p>
+        <p style="margin-bottom: 0.5rem;">
+            <strong>Assumptions & Variables:</strong> All projections are based on the assumptions provided and current
+            tax law. Changes in tax rates, investment performance, or personal circumstances may significantly impact
+            results.
+        </p>
+        <p>
+            <strong>No Guarantee:</strong> Past performance does not guarantee future results. Investment returns, tax
+            benefits, and charitable remainder values are not guaranteed.
+        </p>
+        <div style="margin-top: 1rem; text-align: center; font-size: 8pt;">
+            © 2025 Able Wealth Management. All rights reserved.
+        </div>
+    </div>
 
     <script>
         // --- DATA & CONFIGURATION ---
@@ -224,7 +614,7 @@
             // DAF Section
             { id: 'useDAF', label: 'Use DAF Pre-Sale Strategy', type: 'toggle', value: false, section: 'DAF' },
             { id: 'dafContributionPercentage', label: 'DAF Contribution %', type: 'slider', value: 10, min: 1, max: 30, step: 1, format: 'percent', dependsOn: 'useDAF' },
-            
+
             // CRUT Section
             { id: 'initialContribution', label: 'Total Asset Value', type: 'number', value: 10000000, min: 10000, max: 50000000, step: 10000, format: 'currency', section: 'CRUT' },
             { id: 'assetBasis', label: 'Asset Basis', type: 'number', value: 200000, min: 0, max: 50000000, step: 10000, format: 'currency', section: 'CRUT' },
@@ -240,7 +630,7 @@
             { id: 'clientManagementFee', label: 'Management Fee', type: 'slider', value: 1.0, min: 0, max: 5, step: 0.01, format: 'percent', section: 'CRUT' },
             { id: 'additionalContributionAmount', label: 'Additional Contribution Amt', type: 'number', value: 0, min: 0, max: 5000000, step: 10000, format: 'currency', section: 'CRUT' },
             { id: 'additionalContributionYear', label: 'Year of Add. Contribution', type: 'slider', value: 5, min: 2, max: 40, step: 1, format: 'integer', section: 'CRUT' },
-            
+
             // NING Trust & Tax Section
             { id: 'useNingTrust', label: 'Use NING Trust Strategy', type: 'toggle', value: false, section: 'NING' },
             { id: 'residenceStateTaxRate', label: 'Residence State Tax Rate', type: 'slider', value: 10.75, min: 0, max: 15, step: 0.01, format: 'percent', dependsOn: 'useNingTrust' },
@@ -271,7 +661,7 @@
             // Life Expectancy Calculation
             if (termType === 'Life Expectancy') {
                 const lifeExpectancyTable = { 20: 61, 25: 56, 30: 51, 35: 46, 40: 41, 45: 37, 50: 32, 55: 28, 60: 23, 65: 19, 70: 15, 75: 11, 80: 8, 85: 6, 90: 4, 95: 3 };
-                const closestAge = Object.keys(lifeExpectancyTable).reduce((prev, curr) => 
+                const closestAge = Object.keys(lifeExpectancyTable).reduce((prev, curr) =>
                     (Math.abs(curr - grantorAge) < Math.abs(prev - grantorAge) ? curr : prev)
                 );
                 trustTerm = lifeExpectancyTable[closestAge];
@@ -299,14 +689,14 @@
                 const daf_contribution_dec = dafContributionPercentage / 100;
                 dafDonationValue = initialContribution * daf_contribution_dec;
                 initialContributionForCRUT = initialContribution - dafDonationValue;
-                
+
                 const basisOfDAFPortion = assetBasis * daf_contribution_dec;
                 basisForCRUT = assetBasis - basisOfDAFPortion;
 
                 avoidedCapitalGainsOnDAF = (dafDonationValue - basisOfDAFPortion) * capital_gains_tax_rate_dec;
                 dafTaxDeduction = dafDonationValue;
             }
-            
+
             const upfrontTaxSavingsFromDAF = dafTaxDeduction * grantor_ordinary_tax_rate_dec;
 
             // Phase 2: FLIP-NIMCRUT & NING Trust Projection
@@ -321,7 +711,7 @@
                 const age_adjustment = (age - 65) * 0.002;
                 return Math.min(0.95, Math.max(0.1, remainder_factor + age_adjustment));
             };
-            
+
             const charitable_remainder_factor = calculateCharitableRemainderFactor(grantorAge, trustTerm, adjusted_payout_rate, section_7520_rate_dec);
             const present_value_of_remainder = initialContributionForCRUT * charitable_remainder_factor;
 
@@ -351,7 +741,7 @@
 
                 const client_fee_paid = begin_value * client_management_fee_dec;
                 cumulativeClientFees += client_fee_paid;
-                
+
                 // Corrected Logic: Base for growth is net of fees for a more conservative projection.
                 const growth_base = begin_value - client_fee_paid;
 
@@ -364,9 +754,9 @@
                     appreciation = growth_base * post_flip_cap_appreciation_dec;
                 }
                 const growth = income_generated + appreciation;
-                
+
                 const unitrust_amount = begin_value * payout_rate_dec;
-                
+
                 let actual_payment, makeup_paid_this_year = 0;
                 const makeup_owed_this_year = Math.max(0, unitrust_amount - income_generated);
 
@@ -377,17 +767,17 @@
                     makeup_paid_this_year = makeup_owed + makeup_owed_this_year;
                     actual_payment = unitrust_amount + makeup_paid_this_year;
                     makeup_owed = 0;
-                } else { 
+                } else {
                     makeup_owed = 0;
                     actual_payment = unitrust_amount;
                 }
-                
+
                 let stateTaxSavedForYear = 0;
                 if (useNingTrust) {
                     stateTaxSavedForYear = actual_payment * residence_state_tax_rate_dec;
                     totalStateTaxSaved += stateTaxSavedForYear;
                 }
-                
+
                 const end_value = begin_value + growth - actual_payment - client_fee_paid;
 
                 projection_data.push({
@@ -473,7 +863,7 @@
                     const label = document.createElement('label');
                     label.htmlFor = config.id;
                     label.className = 'block text-xs font-medium text-gray-700 mb-1';
-                    
+
                     const labelText = document.createElement('span');
                     labelText.textContent = config.label;
                     label.appendChild(labelText);
@@ -537,7 +927,7 @@
                     currentInputs[config.id] = parseFloat(el.value);
                     const valueSpan = document.getElementById(`${config.id}-value`);
                     if (valueSpan) {
-                         if (config.format === 'percent') {
+                        if (config.format === 'percent') {
                             valueSpan.textContent = `${parseFloat(el.value).toFixed(2)}%`;
                         } else {
                             valueSpan.textContent = formatters[config.format](currentInputs[config.id]);
@@ -557,7 +947,7 @@
                     } else if (controller.type === 'select-one') {
                         shouldShow = controller.value === config.dependsOnValue;
                     }
-                    
+
                     if (shouldShow) {
                         group.classList.remove('hidden');
                     } else {
@@ -565,12 +955,12 @@
                     }
                 }
             });
-            
+
             const result = runModel(currentInputs);
-            
+
             if (result.error) {
                 document.getElementById('summary-details').innerHTML = '';
-                if(summaryChart) summaryChart.destroy();
+                if (summaryChart) summaryChart.destroy();
                 projectionHeadEl.innerHTML = '';
                 projectionBodyEl.innerHTML = '';
                 errorMessageEl.textContent = result.error;
@@ -623,7 +1013,7 @@
                     }
                 }
             });
-            
+
             let termDisplay = inputs.termType === 'Life Expectancy' ? `Life Expectancy (${summary['Calculated Trust Term']} Yrs)` : `${summary['Calculated Trust Term']} Years`;
 
             summaryDetailsEl.innerHTML = `
@@ -670,7 +1060,7 @@
 
         function renderProjection(data, currentInputs) {
             if (!data || data.length === 0) return;
-            
+
             projectionHeadEl.innerHTML = '';
             const headerRow = document.createElement('tr');
             Object.keys(data[0]).forEach(key => {
@@ -686,7 +1076,7 @@
             projectionBodyEl.innerHTML = '';
             data.forEach((row, index) => {
                 const tr = document.createElement('tr');
-                
+
                 if (row.Year === currentInputs.flipTriggerYear) {
                     tr.className = 'bg-yellow-100 font-semibold';
                 } else if (index === data.length - 1) {
@@ -705,7 +1095,7 @@
                     if (!currentInputs.useNingTrust && key === 'State Tax Saved') return;
                     const td = document.createElement('td');
                     td.className = 'table-cell';
-                    
+
                     if (key.includes('Year') || key.includes('Age')) {
                         td.textContent = formatters.integer(value);
                     } else {
@@ -719,10 +1109,10 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             const contentWrapper = document.querySelector('#explanation-content > div');
-            
+
             createInputs();
             updateModel();
-            
+
             const toggle = document.getElementById('explanation-toggle');
             const content = document.getElementById('explanation-content');
             const arrow = document.getElementById('explanation-arrow');
@@ -768,6 +1158,135 @@
                 }
             });
         });
+
+        // --- PRINT REPORT FUNCTIONALITY ---
+        function generatePrintReport() {
+            // Set print date
+            document.getElementById('print-date').textContent = new Date().toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+
+            // Generate assumptions summary for print
+            generatePrintAssumptions();
+
+            // Trigger print dialog
+            window.print();
+        }
+
+        function generatePrintAssumptions() {
+            const printAssumptionsEl = document.getElementById('print-assumptions-content');
+            const currentInputs = getCurrentInputs();
+
+            const sections = {
+                'Strategy Configuration': [
+                    { label: 'Use DAF Pre-Sale Strategy', value: currentInputs.useDAF ? 'Yes' : 'No' },
+                    { label: 'DAF Contribution %', value: currentInputs.useDAF ? `${currentInputs.dafContributionPercentage}%` : 'N/A' },
+                    { label: 'Use NING Trust Strategy', value: currentInputs.useNingTrust ? 'Yes' : 'No' },
+                    { label: 'Include NIIT on Sale', value: (currentInputs.useNingTrust && currentInputs.includeNIIT) ? 'Yes' : 'No' }
+                ],
+                'Asset & Trust Details': [
+                    { label: 'Total Asset Value', value: `$${formatters.currency(currentInputs.initialContribution)}` },
+                    { label: 'Asset Basis', value: `$${formatters.currency(currentInputs.assetBasis)}` },
+                    { label: 'Grantor Age', value: `${currentInputs.grantorAge} years` },
+                    { label: 'Trust Term', value: currentInputs.termType === 'Life Expectancy' ? 'Life Expectancy' : `${currentInputs.trustTerm} years` },
+                    { label: 'Payout Rate', value: `${currentInputs.payoutRate}%` },
+                    { label: 'Flip Trigger Year', value: `Year ${currentInputs.flipTriggerYear}` }
+                ],
+                'Growth & Tax Assumptions': [
+                    { label: 'Pre-Flip Growth Rate', value: `${currentInputs.preFlipGrowthRate}%` },
+                    { label: 'Post-Flip Income Yield', value: `${currentInputs.postFlipIncomeYield}%` },
+                    { label: 'Post-Flip Cap. Appreciation', value: `${currentInputs.postFlipCapAppreciation}%` },
+                    { label: 'Ordinary Tax Rate', value: `${currentInputs.grantorOrdinaryTaxRate}%` },
+                    { label: 'Capital Gains Tax Rate', value: `${currentInputs.capitalGainsTaxRate}%` },
+                    { label: 'Section 7520 Rate', value: `${currentInputs.section_7520_rate}%` }
+                ]
+            };
+
+            let html = '';
+            Object.entries(sections).forEach(([sectionName, items]) => {
+                html += `<div style="margin-bottom: 1rem;">`;
+                html += `<h4 style="font-weight: bold; color: #1a237e; margin-bottom: 0.5rem; font-size: 10pt;">${sectionName}</h4>`;
+                items.forEach(item => {
+                    html += `<div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">`;
+                    html += `<span>${item.label}:</span>`;
+                    html += `<span style="font-weight: 600;">${item.value}</span>`;
+                    html += `</div>`;
+                });
+                html += `</div>`;
+            });
+
+            printAssumptionsEl.innerHTML = html;
+        }
+
+        function getCurrentInputs() {
+            const inputs = {};
+            inputsConfig.forEach(config => {
+                const element = document.getElementById(config.id);
+                if (element) {
+                    if (config.type === 'toggle') {
+                        inputs[config.id] = element.checked;
+                    } else if (config.type === 'number' || config.type === 'slider') {
+                        inputs[config.id] = parseFloat(element.value);
+                    } else {
+                        inputs[config.id] = element.value;
+                    }
+                }
+            });
+            return inputs;
+        }
+
+        // Override the existing generatePrintAssumptions function with improved version
+        function generatePrintAssumptions() {
+            const printAssumptionsEl = document.getElementById('print-assumptions-content');
+            const currentInputs = getCurrentInputs();
+
+            const sections = {
+                'Strategy': [
+                    { label: 'DAF Pre-Sale', value: currentInputs.useDAF ? 'Yes' : 'No' },
+                    { label: 'DAF %', value: currentInputs.useDAF ? `${currentInputs.dafContributionPercentage}%` : 'N/A' },
+                    { label: 'NING Trust', value: currentInputs.useNingTrust ? 'Yes' : 'No' },
+                    { label: 'Include NIIT', value: (currentInputs.useNingTrust && currentInputs.includeNIIT) ? 'Yes' : 'No' }
+                ],
+                'Asset Details': [
+                    { label: 'Asset Value', value: `$${formatters.currency(currentInputs.initialContribution)}` },
+                    { label: 'Asset Basis', value: `$${formatters.currency(currentInputs.assetBasis)}` },
+                    { label: 'Grantor Age', value: `${currentInputs.grantorAge}` },
+                    { label: 'Trust Term', value: currentInputs.termType === 'Life Expectancy' ? 'Life Exp.' : `${currentInputs.trustTerm} yrs` },
+                    { label: 'Payout Rate', value: `${currentInputs.payoutRate}%` },
+                    { label: 'Flip Year', value: `${currentInputs.flipTriggerYear}` }
+                ],
+                'Growth Rates': [
+                    { label: 'Pre-Flip Growth', value: `${currentInputs.preFlipGrowthRate}%` },
+                    { label: 'Post-Flip Income', value: `${currentInputs.postFlipIncomeYield}%` },
+                    { label: 'Post-Flip Growth', value: `${currentInputs.postFlipCapAppreciation}%` },
+                    { label: 'Management Fee', value: `${currentInputs.clientManagementFee}%` }
+                ],
+                'Tax Rates': [
+                    { label: 'Ordinary Tax', value: `${currentInputs.grantorOrdinaryTaxRate}%` },
+                    { label: 'Capital Gains', value: `${currentInputs.capitalGainsTaxRate}%` },
+                    { label: 'Section 7520', value: `${currentInputs.section_7520_rate}%` },
+                    { label: 'State Tax', value: currentInputs.useNingTrust ? `${currentInputs.residenceStateTaxRate}%` : 'N/A' }
+                ]
+            };
+
+            let html = '';
+            Object.entries(sections).forEach(([sectionName, items]) => {
+                html += `<div class="assumption-section">`;
+                html += `<h4>${sectionName}</h4>`;
+                items.forEach(item => {
+                    html += `<div class="assumption-item">`;
+                    html += `<span class="assumption-label">${item.label}:</span>`;
+                    html += `<span class="assumption-value">${item.value}</span>`;
+                    html += `</div>`;
+                });
+                html += `</div>`;
+            });
+
+            printAssumptionsEl.innerHTML = html;
+        }
     </script>
 </body>
+
 </html>
