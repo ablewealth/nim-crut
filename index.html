@@ -706,8 +706,7 @@
                     dafDeductionCarriedForward = dafTaxDeduction - dafDeductionUsed;
                 }
             }
-            const upfrontTaxSavingsFromDAF = dafDeductionUsed * grantor_ordinary_tax_rate_dec;
-
+            
             // Determine CRUT Contribution
             let initialContributionForCRUT = assetAvailableForCRUT;
             let basisForCRUT = basisAvailableForCRUT;
@@ -755,10 +754,12 @@
                 crutDeductionCarriedForward = crutTaxDeduction - crutDeductionUsed;
             }
             
-            const upfrontTaxSavingsFromCRUT = crutDeductionUsed * grantor_ordinary_tax_rate_dec;
+            const dafTaxSavings = dafDeductionUsed * grantor_ordinary_tax_rate_dec;
+            const crutTaxSavings = crutDeductionUsed * grantor_ordinary_tax_rate_dec;
+            const totalUpfrontTaxSavings = dafTaxSavings + crutTaxSavings;
             
             // Net out immediate tax from deduction savings
-            immediateCapGainsTax -= upfrontTaxSavingsFromCRUT;
+            immediateCapGainsTax -= totalUpfrontTaxSavings;
 
             let oneTimeNiitPaid = 0;
             if (useNingTrust && includeNIIT) {
@@ -837,12 +838,6 @@
             const totalPaymentsToGrantor = projection_data.reduce((sum, row) => sum + row["Actual Payment Made"], 0);
             const remainderToCharity = projection_data.length > 0 ? projection_data[projection_data.length - 1]["End Value"] : 0;
             
-            // Calculate comprehensive tax savings
-            const dafTaxSavings = dafDeductionUsed * grantor_ordinary_tax_rate_dec;
-            const crutTaxSavings = crutDeductionUsed * grantor_ordinary_tax_rate_dec;
-            const totalUpfrontTaxSavings = dafTaxSavings + crutTaxSavings;
-            
-            // Calculate total tax liabilities mitigated
             const totalTaxLiabilitiesMitigated = avoidedCapitalGainsOnDAF + totalStateTaxSaved + totalUpfrontTaxSavings;
             const netTaxLiabilitiesMitigated = totalTaxLiabilitiesMitigated - oneTimeNiitPaid;
 
@@ -1107,7 +1102,6 @@
                     <span class="font-bold text-lg text-green-700">${formatters.currency(summary['Total Benefit of Strategy'])}</span>
                 </div>
                 
-                <!-- Tax Optimization Summary -->
                 <div class="bg-purple-50 p-3 rounded-lg mb-3 border-2 border-purple-200">
                     <div class="flex justify-between items-center mb-2">
                         <span class="font-semibold text-purple-800 text-sm">🛡️ Tax Liabilities Mitigated</span>
@@ -1146,7 +1140,6 @@
                     </div>
                 </div>
                 
-                <!-- Cash Flow Summary -->
                 ${inputs.useCustomCRUTContribution ? `
                 <div class="flex justify-between items-center bg-blue-50 p-2 rounded-lg">
                     <span class="font-medium text-gray-600 text-xs">💰 Upfront Cash to Client</span>
@@ -1166,7 +1159,6 @@
                     <span class="font-semibold text-sm text-yellow-600">${formatters.currency(summary['Projected Remainder to Charity'])}</span>
                 </div>
                 
-                <!-- Deduction Details -->
                 ${(inputs.useDAF && inputs.applyAGILimitation) || inputs.applyCRUTAGILimitation ? `
                 <div class="bg-gray-50 p-3 rounded-lg mt-3">
                     <div class="font-medium text-gray-700 text-xs mb-2">📋 Deduction Details</div>
