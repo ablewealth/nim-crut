@@ -594,7 +594,9 @@
             applyAGILimitation: 'Toggle to apply the 30% AGI limitation on the DAF charitable deduction. Any unused deduction can be carried forward for up to 5 years.',
             applyCRUTAGILimitation: 'Toggle to apply the 30% AGI limitation on the CRUT charitable deduction. Note: Trusts typically do NOT have AGI limitations, but this option allows for conservative modeling.',
             useManagementFee: 'Toggle to include annual management fees charged to the trust. These fees reduce the trust\'s growth and available distributions.',
-            managementFeeRate: 'The annual management fee rate charged to the trust, calculated as a percentage of trust assets. This fee is deducted before calculating investment growth.'
+            managementFeeRate: 'The annual management fee rate charged to the trust, calculated as a percentage of trust assets. This fee is deducted before calculating investment growth.',
+            useCustomCRUTContribution: 'Toggle to specify a custom amount to contribute to the CRUT, rather than contributing the entire remaining asset. This allows for modeling partial contributions and taking some cash upfront.',
+            customCRUTContributionAmount: 'The specific amount of the remaining asset to contribute to the CRUT. Any amount less than the total available will be treated as upfront cash to the client, subject to immediate capital gains tax.'
         };
 
         const inputsConfig = [
@@ -613,10 +615,12 @@
             { id: 'ningStateTaxRate', label: 'NING State Tax Rate', type: 'slider', value: 0, min: 0, max: 15, step: 0.1, format: 'percent', section: 'Strategy', dependsOn: 'useNingTrust' },
             { id: 'includeNIIT', label: 'Include NIIT on Sale', type: 'toggle', value: false, section: 'Strategy', dependsOn: 'useNingTrust' },
             { id: 'niitThreshold', label: 'NIIT MAGI Threshold', type: 'number', value: 250000, min: 0, max: 1000000, step: 10000, format: 'currency', section: 'Strategy', dependsOn: 'useNingTrust' },
-
+            
             // Asset & Contribution Section
             { id: 'initialContribution', label: 'Total Asset Value', type: 'number', value: 10000000, min: 10000, max: 50000000, step: 10000, format: 'currency', section: 'Asset' },
-            { id: 'assetBasis', label: 'Asset Basis', type: 'number', value: 200000, min: 0, max: 50000000, step: 10000, format: 'currency', section: 'Asset' },
+            { id: 'assetBasis', label: 'Asset Basis', type: 'number', value: 0, min: 0, max: 50000000, step: 10000, format: 'currency', section: 'Asset' },
+            { id: 'useCustomCRUTContribution', label: 'Use Custom CRUT Contribution', type: 'toggle', value: false, section: 'Asset' },
+            { id: 'customCRUTContributionAmount', label: 'CRUT Contribution Amount', type: 'number', value: 8000000, min: 0, max: 50000000, step: 10000, format: 'currency', section: 'Asset', dependsOn: 'useCustomCRUTContribution' },
             { id: 'additionalContributionAmount', label: 'Additional Contribution Amount', type: 'number', value: 0, min: 0, max: 5000000, step: 10000, format: 'currency', section: 'Asset' },
             { id: 'additionalContributionYear', label: 'Year of Additional Contribution', type: 'slider', value: 5, min: 2, max: 40, step: 1, format: 'integer', section: 'Asset' },
 
@@ -651,7 +655,8 @@
                 capitalGainsTaxRate, useDAF, dafContributionPercentage, useNingTrust,
                 residenceStateTaxRate, ningStateTaxRate, includeNIIT, niitThreshold,
                 useManagementFee, managementFeeRate, additionalContributionAmount, additionalContributionYear,
-                grantorAGI, applyAGILimitation, applyCRUTAGILimitation
+                grantorAGI, applyAGILimitation, applyCRUTAGILimitation,
+                useCustomCRUTContribution, customCRUTContributionAmount
             } = inputs;
 
             // Life Expectancy Calculation
@@ -675,22 +680,22 @@
             const niit_rate = 0.038;
 
             let dafDonationValue = 0;
-            let initialContributionForCRUT = initialContribution;
+            let assetAvailableForCRUT = initialContribution;
+            let basisAvailableForCRUT = assetBasis;
             let avoidedCapitalGainsOnDAF = 0;
             let dafTaxDeduction = 0;
-            let basisForCRUT = assetBasis;
             let dafDeductionUsed = 0;
             let dafDeductionCarriedForward = 0;
+            let cashToClient = 0;
+            let immediateCapGainsTax = 0;
 
             // Phase 1: DAF Pre-Sale Calculations (Conditional)
             if (useDAF) {
                 const daf_contribution_dec = dafContributionPercentage / 100;
                 dafDonationValue = initialContribution * daf_contribution_dec;
-                initialContributionForCRUT = initialContribution - dafDonationValue;
-
+                assetAvailableForCRUT = initialContribution - dafDonationValue;
                 const basisOfDAFPortion = assetBasis * daf_contribution_dec;
-                basisForCRUT = assetBasis - basisOfDAFPortion;
-
+                basisAvailableForCRUT = assetBasis - basisOfDAFPortion;
                 avoidedCapitalGainsOnDAF = (dafDonationValue - basisOfDAFPortion) * capital_gains_tax_rate_dec;
                 dafTaxDeduction = dafDonationValue;
                 dafDeductionUsed = dafTaxDeduction;
@@ -701,8 +706,23 @@
                     dafDeductionCarriedForward = dafTaxDeduction - dafDeductionUsed;
                 }
             }
-
             const upfrontTaxSavingsFromDAF = dafDeductionUsed * grantor_ordinary_tax_rate_dec;
+
+            // Determine CRUT Contribution
+            let initialContributionForCRUT = assetAvailableForCRUT;
+            let basisForCRUT = basisAvailableForCRUT;
+            
+            if (useCustomCRUTContribution) {
+                initialContributionForCRUT = Math.min(customCRUTContributionAmount, assetAvailableForCRUT);
+                cashToClient = assetAvailableForCRUT - initialContributionForCRUT;
+                const proportionOfBasisForCash = (cashToClient / assetAvailableForCRUT) || 0;
+                const basisOfCashPortion = basisAvailableForCRUT * proportionOfBasisForCash;
+                basisForCRUT = basisAvailableForCRUT - basisOfCashPortion;
+                
+                const gainOnCash = cashToClient - basisOfCashPortion;
+                immediateCapGainsTax = gainOnCash * capital_gains_tax_rate_dec;
+            }
+            
 
             // Phase 2: FLIP-NIMCRUT & NING Trust Projection
             const payout_frequency_factors = { 'Annual': 1.0000, 'Semi-Annual': 0.9878, 'Quarterly': 0.9758, 'Monthly': 0.9642 };
@@ -730,13 +750,15 @@
             
             if (applyCRUTAGILimitation) {
                 const agiLimit = grantorAGI * 0.30;
-                const totalDeductionRequested = dafDeductionUsed + crutTaxDeduction;
                 const remainingAGICapacity = Math.max(0, agiLimit - dafDeductionUsed);
                 crutDeductionUsed = Math.min(crutTaxDeduction, remainingAGICapacity);
                 crutDeductionCarriedForward = crutTaxDeduction - crutDeductionUsed;
             }
             
             const upfrontTaxSavingsFromCRUT = crutDeductionUsed * grantor_ordinary_tax_rate_dec;
+            
+            // Net out immediate tax from deduction savings
+            immediateCapGainsTax -= upfrontTaxSavingsFromCRUT;
 
             let oneTimeNiitPaid = 0;
             if (useNingTrust && includeNIIT) {
@@ -814,9 +836,9 @@
             // Phase 3: Final Reporting & Summary
             const totalPaymentsToGrantor = projection_data.reduce((sum, row) => sum + row["Actual Payment Made"], 0);
             const remainderToCharity = projection_data.length > 0 ? projection_data[projection_data.length - 1]["End Value"] : 0;
-            const upfrontTaxSavings = upfrontTaxSavingsFromDAF + upfrontTaxSavingsFromCRUT;
+            const upfrontTaxSavings = upfrontTaxSavingsFromDAF;
 
-            const totalBenefit = totalPaymentsToGrantor + totalStateTaxSaved - oneTimeNiitPaid + upfrontTaxSavings + avoidedCapitalGainsOnDAF;
+            const totalBenefit = cashToClient - immediateCapGainsTax + totalPaymentsToGrantor + totalStateTaxSaved - oneTimeNiitPaid + upfrontTaxSavings + avoidedCapitalGainsOnDAF;
 
             const summary_report = {
                 "Total Benefit of Strategy": totalBenefit,
@@ -834,6 +856,8 @@
                 "DAF Deduction Carried Forward": dafDeductionCarriedForward,
                 "CRUT Deduction Used": crutDeductionUsed,
                 "CRUT Deduction Carried Forward": crutDeductionCarriedForward,
+                "Upfront Cash to Client": cashToClient,
+                "Immediate Capital Gains Tax": immediateCapGainsTax,
             };
             return { projection_data, summary_report };
         }
@@ -955,8 +979,8 @@
 
         function getSectionTitle(section) {
             const sectionTitles = {
-                'Strategy': '🎯 Strategy Configuration',
-                'Asset': '💰 Asset & Contributions',
+                'Strategy': '⚙️ Strategy Configuration',
+                'Asset': '💼 Asset & Contributions',
                 'Trust': '🏛️ Trust Structure',
                 'Performance': '📈 Investment Performance',
                 'Tax': '📊 Tax Rates'
@@ -1027,10 +1051,10 @@
 
         function renderSummary(summary, inputs) {
             const chartData = {
-                labels: ['Payments to Grantor', 'Remainder to Charity', 'Total Tax Savings'],
+                labels: ['Net Cash to Grantor', 'Remainder to Charity', 'Tax Savings & Avoidance'],
                 datasets: [{
                     data: [
-                        summary['Total Payments to Grantor'],
+                        summary['Upfront Cash to Client'] - summary['Immediate Capital Gains Tax'] + summary['Total Payments to Grantor'],
                         summary['Projected Remainder to Charity'],
                         summary['Total Upfront Tax Savings'] + summary['Total State Tax Saved (NING)'] + summary['Avoided Cap. Gains (DAF)']
                     ],
@@ -1070,24 +1094,25 @@
                     <span class="font-medium text-gray-700 text-sm">Total Benefit of Strategy</span>
                     <span class="font-bold text-lg text-green-700">${formatters.currency(summary['Total Benefit of Strategy'])}</span>
                 </div>
-                <div class="flex justify-between items-center bg-gray-50 p-2 rounded-lg">
-                    <span class="font-medium text-gray-600 text-xs">Trust Term</span>
-                    <span class="font-semibold text-sm text-gray-800">${termDisplay}</span>
+                ${inputs.useCustomCRUTContribution ? `
+                <div class="flex justify-between items-center bg-blue-50 p-2 rounded-lg">
+                    <span class="font-medium text-gray-600 text-xs">Upfront Cash to Client</span>
+                    <span class="font-semibold text-sm text-blue-800">${formatters.currency(summary['Upfront Cash to Client'])}</span>
                 </div>
+                <div class="flex justify-between items-center bg-red-50 p-2 rounded-lg">
+                    <span class="font-medium text-gray-600 text-xs">Immediate Capital Gains Tax</span>
+                    <span class="font-semibold text-sm text-red-600">${formatters.currency(summary['Immediate Capital Gains Tax'])}</span>
+                </div>` : ''}
                 <div class="flex justify-between items-center bg-gray-50 p-2 rounded-lg">
-                    <span class="font-medium text-gray-600 text-xs">Total Payments to Grantor</span>
+                    <span class="font-medium text-gray-600 text-xs">Total Payments to Grantor (CRUT)</span>
                     <span class="font-semibold text-sm text-gray-800">${formatters.currency(summary['Total Payments to Grantor'])}</span>
-                </div>
-                <div class="flex justify-between items-center bg-gray-50 p-2 rounded-lg">
-                    <span class="font-medium text-gray-600 text-xs">Total Client Fees Paid</span>
-                    <span class="font-semibold text-sm text-red-600">${formatters.currency(summary['Total Client Fees Paid'])}</span>
                 </div>
                 <div class="flex justify-between items-center bg-gray-50 p-2 rounded-lg">
                     <span class="font-medium text-gray-600 text-xs">Remainder to Charity</span>
                     <span class="font-semibold text-sm text-yellow-600">${formatters.currency(summary['Projected Remainder to Charity'])}</span>
                 </div>
                 <div class="flex justify-between items-center bg-purple-50 p-2 rounded-lg">
-                    <span class="font-medium text-gray-600 text-xs">Total Upfront Tax Savings</span>
+                    <span class="font-medium text-gray-600 text-xs">Upfront Tax Savings (Deductions)</span>
                     <span class="font-semibold text-sm text-purple-600">${formatters.currency(summary['Total Upfront Tax Savings'])}</span>
                 </div>
                  ${inputs.useDAF ? `
@@ -1250,12 +1275,14 @@
                 'Strategy': [
                     { label: 'DAF Pre-Sale', value: currentInputs.useDAF ? 'Yes' : 'No' },
                     { label: 'DAF %', value: currentInputs.useDAF ? `${currentInputs.dafContributionPercentage}%` : 'N/A' },
+                    { label: 'Custom CRUT Contribution', value: currentInputs.useCustomCRUTContribution ? 'Yes' : 'No' },
                     { label: 'NING Trust', value: currentInputs.useNingTrust ? 'Yes' : 'No' },
                     { label: 'Include NIIT', value: (currentInputs.useNingTrust && currentInputs.includeNIIT) ? 'Yes' : 'No' }
                 ],
                 'Asset Details': [
                     { label: 'Asset Value', value: `$${formatters.currency(currentInputs.initialContribution)}` },
                     { label: 'Asset Basis', value: `$${formatters.currency(currentInputs.assetBasis)}` },
+                    { label: 'CRUT Contribution Amt', value: currentInputs.useCustomCRUTContribution ? `$${formatters.currency(currentInputs.customCRUTContributionAmount)}` : 'N/A' },
                     { label: 'Grantor Age', value: `${currentInputs.grantorAge}` },
                     { label: 'Trust Term', value: currentInputs.termType === 'Life Expectancy' ? 'Life Exp.' : `${currentInputs.trustTerm} yrs` },
                     { label: 'Payout Rate', value: `${currentInputs.payoutRate}%` },
@@ -1272,7 +1299,7 @@
                     { label: 'Capital Gains Tax', value: `${currentInputs.capitalGainsTaxRate}%` },
                     { label: 'Section 7520', value: `${currentInputs.section_7520_rate}%` },
                     { label: 'State Tax', value: currentInputs.useNingTrust ? `${currentInputs.residenceStateTaxRate}%` : 'N/A' },
-                    { label: 'Grantor\'s AGI', value: currentInputs.useDAF ? `${formatters.currency(currentInputs.grantorAGI)}` : 'N/A' },
+                    { label: 'Grantor\'s AGI', value: (inputs.useDAF || inputs.applyCRUTAGILimitation) ? `${formatters.currency(currentInputs.grantorAGI)}` : 'N/A' },
                     { label: 'Apply 30% AGI Limit (DAF)', value: currentInputs.useDAF ? (currentInputs.applyAGILimitation ? 'Yes' : 'No') : 'N/A' },
                     { label: 'Apply 30% AGI Limit (CRUT)', value: currentInputs.applyCRUTAGILimitation ? 'Yes' : 'No' }
                 ]
@@ -1309,59 +1336,6 @@
                 }
             });
             return inputs;
-        }
-
-        // Override the existing generatePrintAssumptions function with improved version
-        function generatePrintAssumptions() {
-            const printAssumptionsEl = document.getElementById('print-assumptions-content');
-            const currentInputs = getCurrentInputs();
-
-            const sections = {
-                'Strategy': [
-                    { label: 'DAF Pre-Sale', value: currentInputs.useDAF ? 'Yes' : 'No' },
-                    { label: 'DAF %', value: currentInputs.useDAF ? `${currentInputs.dafContributionPercentage}%` : 'N/A' },
-                    { label: 'NING Trust', value: currentInputs.useNingTrust ? 'Yes' : 'No' },
-                    { label: 'Include NIIT', value: (currentInputs.useNingTrust && currentInputs.includeNIIT) ? 'Yes' : 'No' }
-                ],
-                'Asset Details': [
-                    { label: 'Asset Value', value: `$${formatters.currency(currentInputs.initialContribution)}` },
-                    { label: 'Asset Basis', value: `$${formatters.currency(currentInputs.assetBasis)}` },
-                    { label: 'Grantor Age', value: `${currentInputs.grantorAge}` },
-                    { label: 'Trust Term', value: currentInputs.termType === 'Life Expectancy' ? 'Life Exp.' : `${currentInputs.trustTerm} yrs` },
-                    { label: 'Payout Rate', value: `${currentInputs.payoutRate}%` },
-                    { label: 'Flip Year', value: `${currentInputs.flipTriggerYear}` }
-                ],
-                'Growth Rates': [
-                    { label: 'Pre-Flip Growth', value: `${currentInputs.preFlipGrowthRate}%` },
-                    { label: 'Post-Flip Income', value: `${currentInputs.postFlipIncomeYield}%` },
-                    { label: 'Post-Flip Growth', value: `${currentInputs.postFlipCapAppreciation}%` },
-                    { label: 'Management Fee', value: currentInputs.useManagementFee ? `${currentInputs.managementFeeRate}%` : 'None' }
-                ],
-                'Tax Rates': [
-                    { label: 'Ordinary Income Tax', value: `${currentInputs.grantorOrdinaryTaxRate}%` },
-                    { label: 'Capital Gains Tax', value: `${currentInputs.capitalGainsTaxRate}%` },
-                    { label: 'Section 7520', value: `${currentInputs.section_7520_rate}%` },
-                    { label: 'State Tax', value: currentInputs.useNingTrust ? `${currentInputs.residenceStateTaxRate}%` : 'N/A' },
-                    { label: 'Grantor\'s AGI', value: currentInputs.useDAF ? `${formatters.currency(currentInputs.grantorAGI)}` : 'N/A' },
-                    { label: 'Apply 30% AGI Limit (DAF)', value: currentInputs.useDAF ? (currentInputs.applyAGILimitation ? 'Yes' : 'No') : 'N/A' },
-                    { label: 'Apply 30% AGI Limit (CRUT)', value: currentInputs.applyCRUTAGILimitation ? 'Yes' : 'No' }
-                ]
-            };
-
-            let html = '';
-            Object.entries(sections).forEach(([sectionName, items]) => {
-                html += `<div class="assumption-section">`;
-                html += `<h4>${sectionName}</h4>`;
-                items.forEach(item => {
-                    html += `<div class="assumption-item">`;
-                    html += `<span class="assumption-label">${item.label}:</span>`;
-                    html += `<span class="assumption-value">${item.value}</span>`;
-                    html += `</div>`;
-                });
-                html += `</div>`;
-            });
-
-            printAssumptionsEl.innerHTML = html;
         }
     </script>
 </body>
