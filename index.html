@@ -597,7 +597,8 @@
             additionalContributionAmount: 'A future, one-time contribution to the trust.',
             additionalContributionYear: 'The year in which the additional contribution is made.',
             grantorAGI: 'The Grantor\'s Adjusted Gross Income. Used to calculate the 30% AGI limitation for DAF contributions.',
-            applyAGILimitation: 'Toggle to apply the 30% AGI limitation on the DAF charitable deduction. Any unused deduction can be carried forward for up to 5 years.'
+            applyAGILimitation: 'Toggle to apply the 30% AGI limitation on the DAF charitable deduction. Any unused deduction can be carried forward for up to 5 years.',
+            applyCRUTAGILimitation: 'Toggle to apply the 30% AGI limitation on the CRUT charitable deduction. Note: Trusts typically do NOT have AGI limitations, but this option allows for conservative modeling.'
         };
 
         const inputsConfig = [
@@ -605,7 +606,8 @@
             { id: 'useDAF', label: 'Use DAF Pre-Sale Strategy', type: 'toggle', value: false, section: 'Strategy' },
             { id: 'dafContributionPercentage', label: 'DAF Contribution %', type: 'slider', value: 10, min: 1, max: 30, step: 1, format: 'percent', section: 'Strategy', dependsOn: 'useDAF' },
             { id: 'grantorAGI', label: 'Grantor\'s AGI', type: 'number', value: 500000, min: 0, max: 10000000, step: 10000, format: 'currency', section: 'Strategy', dependsOn: 'useDAF' },
-            { id: 'applyAGILimitation', label: 'Apply 30% AGI Limit', type: 'toggle', value: false, section: 'Strategy', dependsOn: 'useDAF' },
+            { id: 'applyAGILimitation', label: 'Apply 30% AGI Limit (DAF)', type: 'toggle', value: false, section: 'Strategy', dependsOn: 'useDAF' },
+            { id: 'applyCRUTAGILimitation', label: 'Apply 30% AGI Limit (CRUT)', type: 'toggle', value: false, section: 'Strategy' },
             
             { id: 'useNingTrust', label: 'Use NING Trust Strategy', type: 'toggle', value: false, section: 'Strategy' },
             { id: 'residenceStateTaxRate', label: 'Residence State Tax Rate', type: 'slider', value: 10.75, min: 0, max: 15, step: 0.01, format: 'percent', section: 'Strategy', dependsOn: 'useNingTrust' },
@@ -651,7 +653,7 @@
                 capitalGainsTaxRate, useDAF, dafContributionPercentage, useNingTrust,
                 residenceStateTaxRate, ningStateTaxRate, includeNIIT, niitThreshold,
                 clientManagementFee, additionalContributionAmount, additionalContributionYear,
-                grantorAGI, applyAGILimitation
+                grantorAGI, applyAGILimitation, applyCRUTAGILimitation
             } = inputs;
 
             // Life Expectancy Calculation
@@ -725,7 +727,18 @@
             }
 
             const crutTaxDeduction = present_value_of_remainder;
-            const upfrontTaxSavingsFromCRUT = crutTaxDeduction * grantor_ordinary_tax_rate_dec;
+            let crutDeductionUsed = crutTaxDeduction;
+            let crutDeductionCarriedForward = 0;
+            
+            if (applyCRUTAGILimitation) {
+                const agiLimit = grantorAGI * 0.30;
+                const totalDeductionRequested = dafDeductionUsed + crutTaxDeduction;
+                const remainingAGICapacity = Math.max(0, agiLimit - dafDeductionUsed);
+                crutDeductionUsed = Math.min(crutTaxDeduction, remainingAGICapacity);
+                crutDeductionCarriedForward = crutTaxDeduction - crutDeductionUsed;
+            }
+            
+            const upfrontTaxSavingsFromCRUT = crutDeductionUsed * grantor_ordinary_tax_rate_dec;
 
             let oneTimeNiitPaid = 0;
             if (useNingTrust && includeNIIT) {
@@ -821,6 +834,8 @@
                 "Calculated Trust Term": trustTerm,
                 "DAF Deduction Used": dafDeductionUsed,
                 "DAF Deduction Carried Forward": dafDeductionCarriedForward,
+                "CRUT Deduction Used": crutDeductionUsed,
+                "CRUT Deduction Carried Forward": crutDeductionCarriedForward,
             };
             return { projection_data, summary_report };
         }
@@ -1091,6 +1106,15 @@
                     <span class="font-medium text-gray-500 text-xs">DAF Deduction Carryforward</span>
                     <span class="font-semibold text-sm text-gray-800">${formatters.currency(summary['DAF Deduction Carried Forward'])}</span>
                 </div>` : ''}
+                ${(inputs.applyCRUTAGILimitation) ? `
+                <div class="flex justify-between items-center bg-gray-50 p-2 rounded-lg ml-4 border-l-2">
+                    <span class="font-medium text-gray-500 text-xs">CRUT Deduction Used (30% AGI)</span>
+                    <span class="font-semibold text-sm text-gray-800">${formatters.currency(summary['CRUT Deduction Used'])}</span>
+                </div>
+                <div class="flex justify-between items-center bg-gray-50 p-2 rounded-lg ml-4 border-l-2">
+                    <span class="font-medium text-gray-500 text-xs">CRUT Deduction Carryforward</span>
+                    <span class="font-semibold text-sm text-gray-800">${formatters.currency(summary['CRUT Deduction Carried Forward'])}</span>
+                </div>` : ''}
                 ${inputs.useNingTrust ? `
                 <div class="flex justify-between items-center bg-gray-50 p-2 rounded-lg ml-4 border-l-2">
                     <span class="font-medium text-gray-500 text-xs">Total State Tax Saved (NING)</span>
@@ -1251,7 +1275,8 @@
                     { label: 'Section 7520', value: `${currentInputs.section_7520_rate}%` },
                     { label: 'State Tax', value: currentInputs.useNingTrust ? `${currentInputs.residenceStateTaxRate}%` : 'N/A' },
                     { label: 'Grantor\'s AGI', value: currentInputs.useDAF ? `${formatters.currency(currentInputs.grantorAGI)}` : 'N/A' },
-                    { label: 'Apply 30% AGI Limit', value: currentInputs.useDAF ? (currentInputs.applyAGILimitation ? 'Yes' : 'No') : 'N/A' }
+                    { label: 'Apply 30% AGI Limit (DAF)', value: currentInputs.useDAF ? (currentInputs.applyAGILimitation ? 'Yes' : 'No') : 'N/A' },
+                    { label: 'Apply 30% AGI Limit (CRUT)', value: currentInputs.applyCRUTAGILimitation ? 'Yes' : 'No' }
                 ]
             };
 
@@ -1320,7 +1345,8 @@
                     { label: 'Section 7520', value: `${currentInputs.section_7520_rate}%` },
                     { label: 'State Tax', value: currentInputs.useNingTrust ? `${currentInputs.residenceStateTaxRate}%` : 'N/A' },
                     { label: 'Grantor\'s AGI', value: currentInputs.useDAF ? `${formatters.currency(currentInputs.grantorAGI)}` : 'N/A' },
-                    { label: 'Apply 30% AGI Limit', value: currentInputs.useDAF ? (currentInputs.applyAGILimitation ? 'Yes' : 'No') : 'N/A' }
+                    { label: 'Apply 30% AGI Limit (DAF)', value: currentInputs.useDAF ? (currentInputs.applyAGILimitation ? 'Yes' : 'No') : 'N/A' },
+                    { label: 'Apply 30% AGI Limit (CRUT)', value: currentInputs.applyCRUTAGILimitation ? 'Yes' : 'No' }
                 ]
             };
 
