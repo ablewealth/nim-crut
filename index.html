@@ -593,12 +593,13 @@
             flipTriggerYear: 'The year in which the trust converts from a NIMCRUT to a standard CRUT, allowing for full payouts.',
             grantorOrdinaryTaxRate: 'The grantor\'s marginal income tax rate, used to calculate the value of the charitable deduction.',
             capitalGainsTaxRate: 'The tax rate applied to the profit from selling the asset.',
-            clientManagementFee: 'An annual fee paid from the trust, typically to a trustee or advisor, calculated as a percentage of trust assets.',
             additionalContributionAmount: 'A future, one-time contribution to the trust.',
             additionalContributionYear: 'The year in which the additional contribution is made.',
             grantorAGI: 'The Grantor\'s Adjusted Gross Income. Used to calculate the 30% AGI limitation for DAF contributions.',
             applyAGILimitation: 'Toggle to apply the 30% AGI limitation on the DAF charitable deduction. Any unused deduction can be carried forward for up to 5 years.',
-            applyCRUTAGILimitation: 'Toggle to apply the 30% AGI limitation on the CRUT charitable deduction. Note: Trusts typically do NOT have AGI limitations, but this option allows for conservative modeling.'
+            applyCRUTAGILimitation: 'Toggle to apply the 30% AGI limitation on the CRUT charitable deduction. Note: Trusts typically do NOT have AGI limitations, but this option allows for conservative modeling.',
+            useManagementFee: 'Toggle to include annual management fees charged to the trust. These fees reduce the trust\'s growth and available distributions.',
+            managementFeeRate: 'The annual management fee rate charged to the trust, calculated as a percentage of trust assets. This fee is deducted before calculating investment growth.'
         };
 
         const inputsConfig = [
@@ -608,6 +609,9 @@
             { id: 'grantorAGI', label: 'Grantor\'s AGI', type: 'number', value: 500000, min: 0, max: 10000000, step: 10000, format: 'currency', section: 'Strategy', dependsOn: 'useDAF' },
             { id: 'applyAGILimitation', label: 'Apply 30% AGI Limit (DAF)', type: 'toggle', value: false, section: 'Strategy', dependsOn: 'useDAF' },
             { id: 'applyCRUTAGILimitation', label: 'Apply 30% AGI Limit (CRUT)', type: 'toggle', value: false, section: 'Strategy' },
+            
+            { id: 'useManagementFee', label: 'Include Management Fees', type: 'toggle', value: false, section: 'Strategy' },
+            { id: 'managementFeeRate', label: 'Annual Management Fee Rate', type: 'slider', value: 0.50, min: 0, max: 3, step: 0.01, format: 'percent', section: 'Strategy', dependsOn: 'useManagementFee' },
             
             { id: 'useNingTrust', label: 'Use NING Trust Strategy', type: 'toggle', value: false, section: 'Strategy' },
             { id: 'residenceStateTaxRate', label: 'Residence State Tax Rate', type: 'slider', value: 10.75, min: 0, max: 15, step: 0.01, format: 'percent', section: 'Strategy', dependsOn: 'useNingTrust' },
@@ -633,7 +637,6 @@
             { id: 'preFlipGrowthRate', label: 'Pre-Flip Growth Rate', type: 'slider', value: 8.00, min: 0, max: 20, step: 0.01, format: 'percent', section: 'Performance' },
             { id: 'postFlipIncomeYield', label: 'Post-Flip Income Yield', type: 'slider', value: 2.00, min: 0, max: 15, step: 0.1, format: 'percent', section: 'Performance' },
             { id: 'postFlipCapAppreciation', label: 'Post-Flip Capital Appreciation', type: 'slider', value: 6.00, min: 0, max: 15, step: 0.1, format: 'percent', section: 'Performance' },
-            { id: 'clientManagementFee', label: 'Annual Management Fee', type: 'slider', value: 1.0, min: 0, max: 5, step: 0.01, format: 'percent', section: 'Performance' },
 
             // Tax Rates Section
             { id: 'grantorOrdinaryTaxRate', label: 'Ordinary Income Tax Rate', type: 'slider', value: 37, min: 10, max: 50, step: 1, format: 'percent', section: 'Tax' },
@@ -652,7 +655,7 @@
                 flipTriggerYear, payoutSchedule, section_7520_rate, grantorOrdinaryTaxRate,
                 capitalGainsTaxRate, useDAF, dafContributionPercentage, useNingTrust,
                 residenceStateTaxRate, ningStateTaxRate, includeNIIT, niitThreshold,
-                clientManagementFee, additionalContributionAmount, additionalContributionYear,
+                useManagementFee, managementFeeRate, additionalContributionAmount, additionalContributionYear,
                 grantorAGI, applyAGILimitation, applyCRUTAGILimitation
             } = inputs;
 
@@ -673,7 +676,7 @@
             const grantor_ordinary_tax_rate_dec = grantorOrdinaryTaxRate / 100;
             const capital_gains_tax_rate_dec = capitalGainsTaxRate / 100;
             const residence_state_tax_rate_dec = residenceStateTaxRate / 100;
-            const client_management_fee_dec = clientManagementFee / 100;
+            const client_management_fee_dec = useManagementFee ? (managementFeeRate / 100) : 0;
             const niit_rate = 0.038;
 
             let dafDonationValue = 0;
@@ -1267,7 +1270,7 @@
                     { label: 'Pre-Flip Growth', value: `${currentInputs.preFlipGrowthRate}%` },
                     { label: 'Post-Flip Income', value: `${currentInputs.postFlipIncomeYield}%` },
                     { label: 'Post-Flip Growth', value: `${currentInputs.postFlipCapAppreciation}%` },
-                    { label: 'Management Fee', value: `${currentInputs.clientManagementFee}%` }
+                    { label: 'Management Fee', value: currentInputs.useManagementFee ? `${currentInputs.managementFeeRate}%` : 'None' }
                 ],
                 'Tax Rates': [
                     { label: 'Ordinary Income Tax', value: `${currentInputs.grantorOrdinaryTaxRate}%` },
@@ -1337,7 +1340,7 @@
                     { label: 'Pre-Flip Growth', value: `${currentInputs.preFlipGrowthRate}%` },
                     { label: 'Post-Flip Income', value: `${currentInputs.postFlipIncomeYield}%` },
                     { label: 'Post-Flip Growth', value: `${currentInputs.postFlipCapAppreciation}%` },
-                    { label: 'Management Fee', value: `${currentInputs.clientManagementFee}%` }
+                    { label: 'Management Fee', value: currentInputs.useManagementFee ? `${currentInputs.managementFeeRate}%` : 'None' }
                 ],
                 'Tax Rates': [
                     { label: 'Ordinary Income Tax', value: `${currentInputs.grantorOrdinaryTaxRate}%` },
