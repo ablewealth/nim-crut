@@ -836,18 +836,30 @@
             // Phase 3: Final Reporting & Summary
             const totalPaymentsToGrantor = projection_data.reduce((sum, row) => sum + row["Actual Payment Made"], 0);
             const remainderToCharity = projection_data.length > 0 ? projection_data[projection_data.length - 1]["End Value"] : 0;
-            const upfrontTaxSavings = upfrontTaxSavingsFromDAF;
+            
+            // Calculate comprehensive tax savings
+            const dafTaxSavings = dafDeductionUsed * grantor_ordinary_tax_rate_dec;
+            const crutTaxSavings = crutDeductionUsed * grantor_ordinary_tax_rate_dec;
+            const totalUpfrontTaxSavings = dafTaxSavings + crutTaxSavings;
+            
+            // Calculate total tax liabilities mitigated
+            const totalTaxLiabilitiesMitigated = avoidedCapitalGainsOnDAF + totalStateTaxSaved + totalUpfrontTaxSavings;
+            const netTaxLiabilitiesMitigated = totalTaxLiabilitiesMitigated - oneTimeNiitPaid;
 
-            const totalBenefit = cashToClient - immediateCapGainsTax + totalPaymentsToGrantor + totalStateTaxSaved - oneTimeNiitPaid + upfrontTaxSavings + avoidedCapitalGainsOnDAF;
+            const totalBenefit = cashToClient - immediateCapGainsTax + totalPaymentsToGrantor + totalStateTaxSaved - oneTimeNiitPaid + totalUpfrontTaxSavings + avoidedCapitalGainsOnDAF;
 
             const summary_report = {
                 "Total Benefit of Strategy": totalBenefit,
                 "Total Payments to Grantor": totalPaymentsToGrantor,
                 "Projected Remainder to Charity": remainderToCharity,
-                "Total Upfront Tax Savings": upfrontTaxSavings,
+                "Total Upfront Tax Savings": totalUpfrontTaxSavings,
+                "DAF Tax Savings": dafTaxSavings,
+                "CRUT Tax Savings": crutTaxSavings,
                 "Avoided Cap. Gains (DAF)": avoidedCapitalGainsOnDAF,
                 "Total State Tax Saved (NING)": totalStateTaxSaved,
                 "One-Time NIIT Paid (Trust)": oneTimeNiitPaid,
+                "Total Tax Liabilities Mitigated": totalTaxLiabilitiesMitigated,
+                "Net Tax Liabilities Mitigated": netTaxLiabilitiesMitigated,
                 "Total Client Fees Paid": cumulativeClientFees,
                 "Initial DAF Deduction": dafTaxDeduction,
                 "Initial CRUT Deduction": crutTaxDeduction,
@@ -1056,7 +1068,7 @@
                     data: [
                         summary['Upfront Cash to Client'] - summary['Immediate Capital Gains Tax'] + summary['Total Payments to Grantor'],
                         summary['Projected Remainder to Charity'],
-                        summary['Total Upfront Tax Savings'] + summary['Total State Tax Saved (NING)'] + summary['Avoided Cap. Gains (DAF)']
+                        summary['Net Tax Liabilities Mitigated']
                     ],
                     backgroundColor: ['#303f9f', '#ffc107', '#7e57c2'], // Navy, Gold, Purple
                     hoverBackgroundColor: ['#1a237e', '#ffa000', '#5e35b1'],
@@ -1090,62 +1102,92 @@
             let termDisplay = inputs.termType === 'Life Expectancy' ? `Life Expectancy (${summary['Calculated Trust Term']} Yrs)` : `${summary['Calculated Trust Term']} Years`;
 
             summaryDetailsEl.innerHTML = `
-                <div class="flex justify-between items-center bg-green-50 p-3 rounded-lg">
+                <div class="flex justify-between items-center bg-green-50 p-3 rounded-lg mb-3">
                     <span class="font-medium text-gray-700 text-sm">Total Benefit of Strategy</span>
                     <span class="font-bold text-lg text-green-700">${formatters.currency(summary['Total Benefit of Strategy'])}</span>
                 </div>
+                
+                <!-- Tax Optimization Summary -->
+                <div class="bg-purple-50 p-3 rounded-lg mb-3 border-2 border-purple-200">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="font-semibold text-purple-800 text-sm">🛡️ Tax Liabilities Mitigated</span>
+                        <span class="font-bold text-lg text-purple-800">${formatters.currency(summary['Net Tax Liabilities Mitigated'])}</span>
+                    </div>
+                    <div class="text-xs text-purple-600 space-y-1 pl-4 border-l-2 border-purple-300">
+                        ${summary['DAF Tax Savings'] > 0 ? `
+                        <div class="flex justify-between">
+                            <span>DAF Deduction Tax Savings:</span>
+                            <span class="font-semibold">+${formatters.currency(summary['DAF Tax Savings'])}</span>
+                        </div>` : ''}
+                        ${summary['CRUT Tax Savings'] > 0 ? `
+                        <div class="flex justify-between">
+                            <span>CRUT Deduction Tax Savings:</span>
+                            <span class="font-semibold">+${formatters.currency(summary['CRUT Tax Savings'])}</span>
+                        </div>` : ''}
+                        ${summary['Avoided Cap. Gains (DAF)'] > 0 ? `
+                        <div class="flex justify-between">
+                            <span>Capital Gains Avoided (DAF):</span>
+                            <span class="font-semibold">+${formatters.currency(summary['Avoided Cap. Gains (DAF)'])}</span>
+                        </div>` : ''}
+                        ${summary['Total State Tax Saved (NING)'] > 0 ? `
+                        <div class="flex justify-between">
+                            <span>State Tax Saved (NING):</span>
+                            <span class="font-semibold">+${formatters.currency(summary['Total State Tax Saved (NING)'])}</span>
+                        </div>` : ''}
+                        ${summary['One-Time NIIT Paid (Trust)'] > 0 ? `
+                        <div class="flex justify-between text-red-600">
+                            <span>One-Time NIIT Paid:</span>
+                            <span class="font-semibold">-${formatters.currency(summary['One-Time NIIT Paid (Trust)'])}</span>
+                        </div>` : ''}
+                        <div class="flex justify-between pt-1 border-t border-purple-300 font-semibold">
+                            <span>Gross Tax Benefits:</span>
+                            <span>+${formatters.currency(summary['Total Tax Liabilities Mitigated'])}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Cash Flow Summary -->
                 ${inputs.useCustomCRUTContribution ? `
                 <div class="flex justify-between items-center bg-blue-50 p-2 rounded-lg">
-                    <span class="font-medium text-gray-600 text-xs">Upfront Cash to Client</span>
+                    <span class="font-medium text-gray-600 text-xs">💰 Upfront Cash to Client</span>
                     <span class="font-semibold text-sm text-blue-800">${formatters.currency(summary['Upfront Cash to Client'])}</span>
                 </div>
                 <div class="flex justify-between items-center bg-red-50 p-2 rounded-lg">
-                    <span class="font-medium text-gray-600 text-xs">Immediate Capital Gains Tax</span>
+                    <span class="font-medium text-gray-600 text-xs">📊 Immediate Capital Gains Tax</span>
                     <span class="font-semibold text-sm text-red-600">${formatters.currency(summary['Immediate Capital Gains Tax'])}</span>
                 </div>` : ''}
+                
                 <div class="flex justify-between items-center bg-gray-50 p-2 rounded-lg">
-                    <span class="font-medium text-gray-600 text-xs">Total Payments to Grantor (CRUT)</span>
+                    <span class="font-medium text-gray-600 text-xs">💸 Total Payments to Grantor (CRUT)</span>
                     <span class="font-semibold text-sm text-gray-800">${formatters.currency(summary['Total Payments to Grantor'])}</span>
                 </div>
-                <div class="flex justify-between items-center bg-gray-50 p-2 rounded-lg">
-                    <span class="font-medium text-gray-600 text-xs">Remainder to Charity</span>
+                <div class="flex justify-between items-center bg-yellow-50 p-2 rounded-lg">
+                    <span class="font-medium text-gray-600 text-xs">🎁 Remainder to Charity</span>
                     <span class="font-semibold text-sm text-yellow-600">${formatters.currency(summary['Projected Remainder to Charity'])}</span>
                 </div>
-                <div class="flex justify-between items-center bg-purple-50 p-2 rounded-lg">
-                    <span class="font-medium text-gray-600 text-xs">Upfront Tax Savings (Deductions)</span>
-                    <span class="font-semibold text-sm text-purple-600">${formatters.currency(summary['Total Upfront Tax Savings'])}</span>
-                </div>
-                 ${inputs.useDAF ? `
-                 <div class="flex justify-between items-center bg-gray-50 p-2 rounded-lg ml-4 border-l-2">
-                    <span class="font-medium text-gray-500 text-xs">Avoided Cap. Gains (DAF)</span>
-                    <span class="font-semibold text-sm text-green-600">${formatters.currency(summary['Avoided Cap. Gains (DAF)'])}</span>
-                </div>` : ''}
-                ${(inputs.useDAF && inputs.applyAGILimitation) ? `
-                <div class="flex justify-between items-center bg-gray-50 p-2 rounded-lg ml-4 border-l-2">
-                    <span class="font-medium text-gray-500 text-xs">DAF Deduction Used (30% AGI)</span>
-                    <span class="font-semibold text-sm text-gray-800">${formatters.currency(summary['DAF Deduction Used'])}</span>
-                </div>
-                <div class="flex justify-between items-center bg-gray-50 p-2 rounded-lg ml-4 border-l-2">
-                    <span class="font-medium text-gray-500 text-xs">DAF Deduction Carryforward</span>
-                    <span class="font-semibold text-sm text-gray-800">${formatters.currency(summary['DAF Deduction Carried Forward'])}</span>
-                </div>` : ''}
-                ${(inputs.applyCRUTAGILimitation) ? `
-                <div class="flex justify-between items-center bg-gray-50 p-2 rounded-lg ml-4 border-l-2">
-                    <span class="font-medium text-gray-500 text-xs">CRUT Deduction Used (30% AGI)</span>
-                    <span class="font-semibold text-sm text-gray-800">${formatters.currency(summary['CRUT Deduction Used'])}</span>
-                </div>
-                <div class="flex justify-between items-center bg-gray-50 p-2 rounded-lg ml-4 border-l-2">
-                    <span class="font-medium text-gray-500 text-xs">CRUT Deduction Carryforward</span>
-                    <span class="font-semibold text-sm text-gray-800">${formatters.currency(summary['CRUT Deduction Carried Forward'])}</span>
-                </div>` : ''}
-                ${inputs.useNingTrust ? `
-                <div class="flex justify-between items-center bg-gray-50 p-2 rounded-lg ml-4 border-l-2">
-                    <span class="font-medium text-gray-500 text-xs">Total State Tax Saved (NING)</span>
-                    <span class="font-semibold text-sm text-blue-600">${formatters.currency(summary['Total State Tax Saved (NING)'])}</span>
-                </div>
-                <div class="flex justify-between items-center bg-red-50 p-2 rounded-lg ml-4 border-l-2">
-                    <span class="font-medium text-gray-500 text-xs">One-Time NIIT Paid</span>
-                    <span class="font-semibold text-sm text-red-600">${formatters.currency(summary['One-Time NIIT Paid (Trust)'])}</span>
+                
+                <!-- Deduction Details -->
+                ${(inputs.useDAF && inputs.applyAGILimitation) || inputs.applyCRUTAGILimitation ? `
+                <div class="bg-gray-50 p-3 rounded-lg mt-3">
+                    <div class="font-medium text-gray-700 text-xs mb-2">📋 Deduction Details</div>
+                    ${inputs.useDAF && inputs.applyAGILimitation ? `
+                    <div class="flex justify-between text-xs text-gray-600 ml-2">
+                        <span>DAF Deduction Used (30% AGI):</span>
+                        <span class="font-semibold">${formatters.currency(summary['DAF Deduction Used'])}</span>
+                    </div>
+                    <div class="flex justify-between text-xs text-gray-600 ml-2 mb-1">
+                        <span>DAF Deduction Carryforward:</span>
+                        <span class="font-semibold">${formatters.currency(summary['DAF Deduction Carried Forward'])}</span>
+                    </div>` : ''}
+                    ${inputs.applyCRUTAGILimitation ? `
+                    <div class="flex justify-between text-xs text-gray-600 ml-2">
+                        <span>CRUT Deduction Used (30% AGI):</span>
+                        <span class="font-semibold">${formatters.currency(summary['CRUT Deduction Used'])}</span>
+                    </div>
+                    <div class="flex justify-between text-xs text-gray-600 ml-2">
+                        <span>CRUT Deduction Carryforward:</span>
+                        <span class="font-semibold">${formatters.currency(summary['CRUT Deduction Carried Forward'])}</span>
+                    </div>` : ''}
                 </div>` : ''}
             `;
         }
