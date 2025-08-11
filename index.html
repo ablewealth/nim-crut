@@ -676,6 +676,7 @@
             const grantor_ordinary_tax_rate_dec = grantorOrdinaryTaxRate / 100;
             const capital_gains_tax_rate_dec = capitalGainsTaxRate / 100;
             const residence_state_tax_rate_dec = residenceStateTaxRate / 100;
+            const ning_state_tax_rate_dec = ningStateTaxRate / 100;
             const client_management_fee_dec = useManagementFee ? (managementFeeRate / 100) : 0;
             const niit_rate = 0.038;
 
@@ -688,6 +689,7 @@
             let dafDeductionCarriedForward = 0;
             let cashToClient = 0;
             let immediateCapGainsTax = 0;
+            let ningSavingsOnUpfrontCash = 0;
 
             // Phase 1: DAF Pre-Sale Calculations (Conditional)
             if (useDAF) {
@@ -720,6 +722,12 @@
                 
                 const gainOnCash = cashToClient - basisOfCashPortion;
                 immediateCapGainsTax = gainOnCash * capital_gains_tax_rate_dec;
+
+                if(useNingTrust) {
+                    const taxWithoutNing = cashToClient * residence_state_tax_rate_dec;
+                    const taxWithNing = cashToClient * ning_state_tax_rate_dec;
+                    ningSavingsOnUpfrontCash = taxWithoutNing - taxWithNing;
+                }
             }
             
 
@@ -757,6 +765,7 @@
             const dafTaxSavings = dafDeductionUsed * grantor_ordinary_tax_rate_dec;
             const crutTaxSavings = crutDeductionUsed * grantor_ordinary_tax_rate_dec;
             const totalUpfrontTaxSavings = dafTaxSavings + crutTaxSavings;
+            const upfrontCapGainsTaxDeferredCRUT = (initialContributionForCRUT - basisForCRUT) * capital_gains_tax_rate_dec;
             
             // Net out immediate tax from deduction savings
             immediateCapGainsTax -= totalUpfrontTaxSavings;
@@ -770,7 +779,7 @@
             const projection_data = [];
             let makeup_owed = 0.0;
             let begin_value = initialContributionForCRUT;
-            let totalStateTaxSaved = 0;
+            let totalStateTaxSavedOnPayments = 0;
             let cumulativeClientFees = 0;
 
             for (let year = 1; year <= trustTerm; year++) {
@@ -813,8 +822,8 @@
 
                 let stateTaxSavedForYear = 0;
                 if (useNingTrust) {
-                    stateTaxSavedForYear = actual_payment * residence_state_tax_rate_dec;
-                    totalStateTaxSaved += stateTaxSavedForYear;
+                    stateTaxSavedForYear = actual_payment * (residence_state_tax_rate_dec - ning_state_tax_rate_dec);
+                    totalStateTaxSavedOnPayments += stateTaxSavedForYear;
                 }
 
                 const end_value = begin_value + growth - actual_payment - client_fee_paid;
@@ -838,10 +847,10 @@
             const totalPaymentsToGrantor = projection_data.reduce((sum, row) => sum + row["Actual Payment Made"], 0);
             const remainderToCharity = projection_data.length > 0 ? projection_data[projection_data.length - 1]["End Value"] : 0;
             
-            const totalTaxLiabilitiesMitigated = avoidedCapitalGainsOnDAF + totalStateTaxSaved + totalUpfrontTaxSavings;
+            const totalTaxLiabilitiesMitigated = upfrontCapGainsTaxDeferredCRUT + avoidedCapitalGainsOnDAF + totalStateTaxSavedOnPayments + ningSavingsOnUpfrontCash + totalUpfrontTaxSavings;
             const netTaxLiabilitiesMitigated = totalTaxLiabilitiesMitigated - oneTimeNiitPaid;
 
-            const totalBenefit = cashToClient - immediateCapGainsTax + totalPaymentsToGrantor + totalStateTaxSaved - oneTimeNiitPaid + totalUpfrontTaxSavings + avoidedCapitalGainsOnDAF;
+            const totalBenefit = cashToClient - immediateCapGainsTax + totalPaymentsToGrantor + totalStateTaxSavedOnPayments + ningSavingsOnUpfrontCash - oneTimeNiitPaid + totalUpfrontTaxSavings + avoidedCapitalGainsOnDAF;
 
             const summary_report = {
                 "Total Benefit of Strategy": totalBenefit,
@@ -850,8 +859,10 @@
                 "Total Upfront Tax Savings": totalUpfrontTaxSavings,
                 "DAF Tax Savings": dafTaxSavings,
                 "CRUT Tax Savings": crutTaxSavings,
+                "Upfront Capital Gains Tax Deferred (CRUT)": upfrontCapGainsTaxDeferredCRUT,
                 "Avoided Cap. Gains (DAF)": avoidedCapitalGainsOnDAF,
-                "Total State Tax Saved (NING)": totalStateTaxSaved,
+                "State Tax Saved (CRUT Payments)": totalStateTaxSavedOnPayments,
+                "State Tax Saved (Upfront Cash)": ningSavingsOnUpfrontCash,
                 "One-Time NIIT Paid (Trust)": oneTimeNiitPaid,
                 "Total Tax Liabilities Mitigated": totalTaxLiabilitiesMitigated,
                 "Net Tax Liabilities Mitigated": netTaxLiabilitiesMitigated,
@@ -1108,6 +1119,11 @@
                         <span class="font-bold text-lg text-purple-800">${formatters.currency(summary['Net Tax Liabilities Mitigated'])}</span>
                     </div>
                     <div class="text-xs text-purple-600 space-y-1 pl-4 border-l-2 border-purple-300">
+                        ${summary['Upfront Capital Gains Tax Deferred (CRUT)'] > 0 ? `
+                        <div class="flex justify-between">
+                            <span>Upfront Cap. Gains Deferred (CRUT):</span>
+                            <span class="font-semibold">+${formatters.currency(summary['Upfront Capital Gains Tax Deferred (CRUT)'])}</span>
+                        </div>` : ''}
                         ${summary['DAF Tax Savings'] > 0 ? `
                         <div class="flex justify-between">
                             <span>DAF Deduction Tax Savings:</span>
@@ -1123,10 +1139,15 @@
                             <span>Capital Gains Avoided (DAF):</span>
                             <span class="font-semibold">+${formatters.currency(summary['Avoided Cap. Gains (DAF)'])}</span>
                         </div>` : ''}
-                        ${summary['Total State Tax Saved (NING)'] > 0 ? `
+                        ${summary['State Tax Saved (Upfront Cash)'] > 0 ? `
                         <div class="flex justify-between">
-                            <span>State Tax Saved (NING):</span>
-                            <span class="font-semibold">+${formatters.currency(summary['Total State Tax Saved (NING)'])}</span>
+                            <span>State Tax Saved (Upfront Cash):</span>
+                            <span class="font-semibold">+${formatters.currency(summary['State Tax Saved (Upfront Cash)'])}</span>
+                        </div>` : ''}
+                        ${summary['State Tax Saved (CRUT Payments)'] > 0 ? `
+                        <div class="flex justify-between">
+                            <span>State Tax Saved (CRUT Payments):</span>
+                            <span class="font-semibold">+${formatters.currency(summary['State Tax Saved (CRUT Payments)'])}</span>
                         </div>` : ''}
                         ${summary['One-Time NIIT Paid (Trust)'] > 0 ? `
                         <div class="flex justify-between text-red-600">
