@@ -9,6 +9,7 @@ const summaryDetailsEl = document.getElementById('summary-details');
 const projectionHeadEl = document.getElementById('projection-head');
 const projectionBodyEl = document.getElementById('projection-body');
 const errorMessageEl = document.getElementById('error-message');
+const warningMessageEl = document.getElementById('warning-message');
 
 function getSectionTitle(section) {
     const sectionTitles = {
@@ -161,6 +162,27 @@ function updateConditionalFields() {
 
         group.classList.toggle('hidden', !shouldShow);
     });
+}
+
+
+function renderWarnings(warnings = []) {
+    if (!warningMessageEl) {
+        return;
+    }
+
+    if (warnings.length === 0) {
+        warningMessageEl.innerHTML = '';
+        warningMessageEl.classList.add('hidden');
+        return;
+    }
+
+    warningMessageEl.innerHTML = `
+        <div class="font-semibold mb-2">Assumption warnings</div>
+        <ul class="list-disc pl-5 space-y-1 text-sm">
+            ${warnings.map((warning) => `<li>${warning}</li>`).join('')}
+        </ul>
+    `;
+    warningMessageEl.classList.remove('hidden');
 }
 
 function updateDisplayedValues(currentInputs) {
@@ -328,9 +350,13 @@ function renderProjection(data, currentInputs) {
 
             const td = document.createElement('td');
             td.className = 'table-cell';
-            td.textContent = key.includes('Year') || key.includes('Age')
-                ? formatters.integer(value)
-                : formatters.currency(value);
+            if (typeof value === 'string') {
+                td.textContent = value;
+            } else if (key.includes('Year') || key.includes('Age')) {
+                td.textContent = formatters.integer(value);
+            } else {
+                td.textContent = formatters.currency(value);
+            }
             tr.appendChild(td);
         });
 
@@ -352,12 +378,14 @@ function updateModel() {
         }
         projectionHeadEl.innerHTML = '';
         projectionBodyEl.innerHTML = '';
+        warningMessageEl?.classList.add('hidden');
         errorMessageEl.textContent = result.error;
         errorMessageEl.classList.remove('hidden');
         return;
     }
 
     errorMessageEl.classList.add('hidden');
+    renderWarnings(result.validation?.warnings || []);
     document.getElementById('flipTriggerYear').max = result.summary_report['Calculated Trust Term'];
     document.getElementById('additionalContributionYear').max = result.summary_report['Calculated Trust Term'];
 

@@ -1,4 +1,5 @@
 import { normalizeInputs } from '../config/inputs.js';
+import { validateInputs } from './validateInputs.js';
 
 const LIFE_EXPECTANCY_TABLE = {
     20: 61,
@@ -44,8 +45,23 @@ function calculateCharitableRemainderFactor(age, term, adjustedPayoutRate, rate7
     return Math.min(0.95, Math.max(0.1, remainderFactor + ageAdjustment));
 }
 
+function createValidationResponse(inputs, validation) {
+    return {
+        error: validation.errors.join(' '),
+        inputs,
+        validation,
+        annual_ledger: [],
+        projection_data: []
+    };
+}
+
 export function runIllustration(rawInputs = {}) {
     const inputs = normalizeInputs(rawInputs);
+    const validation = validateInputs(inputs);
+
+    if (validation.errors.length > 0) {
+        return createValidationResponse(inputs, validation);
+    }
 
     let {
         initialContribution,
@@ -78,6 +94,13 @@ export function runIllustration(rawInputs = {}) {
 
     if (termType === 'Life Expectancy') {
         trustTerm = calculateLifeExpectancyTerm(grantorAge);
+    }
+
+    if (flipTriggerYear > trustTerm) {
+        return createValidationResponse(inputs, {
+            errors: ['Flip trigger year cannot exceed the calculated trust term.'],
+            warnings: validation.warnings
+        });
     }
 
     const payoutRateDec = payoutRate / 100;
@@ -133,7 +156,10 @@ export function runIllustration(rawInputs = {}) {
     if ((presentValueOfRemainder / initialContributionForCRUT) < 0.10) {
         return {
             error: `Error: CRUT fails the 10% remainder test. Remainder is only ${((presentValueOfRemainder / initialContributionForCRUT) * 100).toFixed(2)}%. Try lowering the Payout Rate or increasing the Trust Term.`,
-            inputs
+            inputs,
+            validation,
+            annual_ledger: [],
+            projection_data: []
         };
     }
 
@@ -151,26 +177,33 @@ export function runIllustration(rawInputs = {}) {
     const upfrontTaxSavingsFromCRUT = crutDeductionUsed * grantorOrdinaryTaxRateDec;
 
     let oneTimeNiitPaid = 0;
-    if (useNingTrust && inputs.includeNIIT) {
+    if (useNingTrust && includeNIIT) {
         const totalGainInCRUT = initialContributionForCRUT - basisForCRUT;
         oneTimeNiitPaid = totalGainInCRUT * niitRate;
     }
 
-    const projection_data = [];
+    const annual_ledger = [];
     let makeupOwed = 0;
     let beginValue = initialContributionForCRUT;
     let totalStateTaxSaved = 0;
     let cumulativeClientFees = 0;
 
     for (let year = 1; year <= trustTerm; year += 1) {
-        if (year === additionalContributionYear) {
-            beginValue += additionalContributionAmount;
+        const contributionAdded = year === additionalContributionYear ? additionalContributionAmount : 0;
+        if (contributionAdded > 0) {
+            beginValue += contributionAdded;
         }
 
+        const makeupOwedStart = makeupOwed;
         const clientFeePaid = beginValue * clientManagementFeeDec;
         cumulativeClientFees += clientFeePaid;
 
         const growthBase = beginValue - clientFeePaid;
+        const phase = year < flipTriggerYear
+            ? 'Pre-Flip NIMCRUT'
+            : year === flipTriggerYear
+                ? 'Flip Year'
+                : 'Post-Flip CRUT';
 
         let incomeGenerated;
         let appreciation;
@@ -183,15 +216,17 @@ export function runIllustration(rawInputs = {}) {
         }
 
         const growth = incomeGenerated + appreciation;
+        const valueBeforePayment = beginValue + growth;
         const unitrustAmount = beginValue * payoutRateDec;
         const makeupOwedThisYear = Math.max(0, unitrustAmount - incomeGenerated);
 
         let actualPayment;
+        let makeupPaidThisYear = 0;
         if (year < flipTriggerYear) {
             makeupOwed += makeupOwedThisYear;
             actualPayment = incomeGenerated;
         } else if (year === flipTriggerYear) {
-            const makeupPaidThisYear = makeupOwed + makeupOwedThisYear;
+            makeupPaidThisYear = makeupOwed + makeupOwedThisYear;
             actualPayment = unitrustAmount + makeupPaidThisYear;
             makeupOwed = 0;
         } else {
@@ -207,13 +242,22 @@ export function runIllustration(rawInputs = {}) {
 
         const endValue = beginValue + growth - actualPayment - clientFeePaid;
 
-        projection_data.push({
+        annual_ledger.push({
             Year: year,
+            Phase: phase,
             'Grantor Age': grantorAge + year - 1,
+            'Contribution Added': contributionAdded,
             'Begin Value': beginValue,
-            Growth: growth,
-            'Annual Payment Amount': unitrustAmount,
             'Client Fee Paid': clientFeePaid,
+            'Growth Base': growthBase,
+            'Income Generated': incomeGenerated,
+            'Capital Appreciation': appreciation,
+            Growth: growth,
+            'Value Before Payment': valueBeforePayment,
+            'Annual Payment Amount': unitrustAmount,
+            'Make-Up Owed Start': makeupOwedStart,
+            'Make-Up Owed This Year': makeupOwedThisYear,
+            'Make-Up Paid This Year': makeupPaidThisYear,
             'Actual Payment Made': actualPayment,
             'State Tax Saved': stateTaxSavedForYear,
             'Cumulative Make-Up Owed': makeupOwed,
@@ -222,6 +266,26 @@ export function runIllustration(rawInputs = {}) {
 
         beginValue = endValue;
     }
+
+    const projection_data = annual_ledger.map((row) => ({
+        Year: row.Year,
+        Phase: row.Phase,
+        'Grantor Age': row['Grantor Age'],
+        'Begin Value': row['Begin Value'],
+        'Income Generated': row['Income Generated'],
+        'Capital Appreciation': row['Capital Appreciation'],
+        Growth: row.Growth,
+        'Value Before Payment': row['Value Before Payment'],
+        'Annual Payment Amount': row['Annual Payment Amount'],
+        'Make-Up Owed Start': row['Make-Up Owed Start'],
+        'Make-Up Owed This Year': row['Make-Up Owed This Year'],
+        'Make-Up Paid This Year': row['Make-Up Paid This Year'],
+        'Client Fee Paid': row['Client Fee Paid'],
+        'Actual Payment Made': row['Actual Payment Made'],
+        'State Tax Saved': row['State Tax Saved'],
+        'Cumulative Make-Up Owed': row['Cumulative Make-Up Owed'],
+        'End Value': row['End Value']
+    }));
 
     const totalPaymentsToGrantor = projection_data.reduce((sum, row) => sum + row['Actual Payment Made'], 0);
     const remainderToCharity = projection_data.length > 0 ? projection_data[projection_data.length - 1]['End Value'] : 0;
@@ -246,5 +310,17 @@ export function runIllustration(rawInputs = {}) {
         'CRUT Deduction Carried Forward': crutDeductionCarriedForward
     };
 
-    return { projection_data, summary_report, inputs };
+    const audit = {
+        'Initial Contribution to CRUT': initialContributionForCRUT,
+        'DAF Donation Value': dafDonationValue,
+        'Basis Allocated to CRUT': basisForCRUT,
+        'Adjusted Payout Rate': adjustedPayoutRate,
+        'Charitable Remainder Factor': charitableRemainderFactor,
+        'Present Value of Remainder': presentValueOfRemainder,
+        'Payout Frequency Factor': payoutFrequencyFactor,
+        'Management Fee Applied': clientManagementFeeDec,
+        'Validation Warnings': validation.warnings.length
+    };
+
+    return { projection_data, annual_ledger, summary_report, audit, inputs, validation };
 }

@@ -115,3 +115,39 @@ test('management fees accumulate when enabled', () => {
     assert.ok(result.summary_report['Total Client Fees Paid'] > 0);
     assertApproxEqual(result.projection_data[2]['Begin Value'], 11931886.4, 'begin value reflects contribution before year 3 calculations');
 });
+
+
+test('invalid inputs return structured validation errors before projection', () => {
+    const result = runIllustration({
+        initialContribution: 1000000,
+        assetBasis: 1500000
+    });
+
+    assert.match(result.error, /Asset basis cannot exceed the total asset value/);
+    assert.deepEqual(result.validation.errors, ['Asset basis cannot exceed the total asset value.']);
+    assert.equal(result.projection_data.length, 0);
+});
+
+test('warnings surface for currently captured-but-unused state and NIIT inputs', () => {
+    const result = runIllustration({
+        useNingTrust: true,
+        ningStateTaxRate: 5,
+        includeNIIT: true,
+        niitThreshold: 300000
+    });
+
+    assert.equal(result.validation.warnings.length, 2);
+    assert.match(result.validation.warnings[0], /NING State Tax Rate/);
+    assert.match(result.validation.warnings[1], /NIIT MAGI Threshold/);
+});
+
+test('annual ledger exposes tranche-two audit columns and phase labels', () => {
+    const result = runIllustration(buildDefaultInputs());
+
+    assert.equal(result.annual_ledger[0].Phase, 'Pre-Flip NIMCRUT');
+    assert.equal(result.annual_ledger[4].Phase, 'Flip Year');
+    assert.equal(result.annual_ledger[5].Phase, 'Post-Flip CRUT');
+    assert.ok(Object.prototype.hasOwnProperty.call(result.annual_ledger[0], 'Income Generated'));
+    assert.ok(Object.prototype.hasOwnProperty.call(result.annual_ledger[0], 'Value Before Payment'));
+    assert.ok(Object.prototype.hasOwnProperty.call(result.annual_ledger[0], 'Make-Up Paid This Year'));
+});
