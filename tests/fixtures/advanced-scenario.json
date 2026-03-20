@@ -1,0 +1,48 @@
+{
+  "inputs": {
+    "useDAF": true,
+    "dafContributionPercentage": 20,
+    "grantorAGI": 500000,
+    "applyAGILimitation": true,
+    "applyCRUTAGILimitation": true,
+    "useNingTrust": true,
+    "residenceStateTaxRate": 10,
+    "ningStateTaxRate": 0,
+    "includeNIIT": true,
+    "useManagementFee": true,
+    "managementFeeRate": 1,
+    "termType": "Life Expectancy",
+    "grantorAge": 70,
+    "additionalContributionAmount": 500000,
+    "additionalContributionYear": 3
+  },
+  "expected": {
+    "summary": {
+      "Total Benefit of Strategy": 10862463.960781172,
+      "Total Payments to Grantor": 9738985.418891974,
+      "Projected Remainder to Charity": 7185251.967757298,
+      "Total Upfront Tax Savings": 55500,
+      "Avoided Cap. Gains (DAF)": 392000,
+      "Total State Tax Saved (NING)": 973898.5418891978,
+      "One-Time NIIT Paid (Trust)": 297920,
+      "Total Client Fees Paid": 1217375.3448915137,
+      "Initial DAF Deduction": 2000000,
+      "Initial CRUT Deduction": 1852205.1770916407,
+      "Calculated Trust Term": 15,
+      "DAF Deduction Used": 150000,
+      "DAF Deduction Carried Forward": 1850000,
+      "CRUT Deduction Used": 0,
+      "CRUT Deduction Carried Forward": 1852205.1770916407
+    },
+    "firstYear": {
+      "Begin Value": 8000000,
+      "Client Fee Paid": 80000,
+      "End Value": 8553600
+    },
+    "thirdYear": {
+      "Begin Value": 9645509.12,
+      "Cumulative Make-Up Owed": 1964933.184
+    },
+    "rowCount": 15
+  }
+}

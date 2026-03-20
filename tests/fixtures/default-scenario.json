@@ -1,0 +1,24 @@
+{
+  "inputs": {},
+  "expected": {
+    "summary": {
+      "Total Benefit of Strategy": 16640516.821707653,
+      "Total Payments to Grantor": 16270516.821707653,
+      "Projected Remainder to Charity": 10286547.598247174,
+      "Total Upfront Tax Savings": 370000,
+      "Initial CRUT Deduction": 1000000,
+      "Calculated Trust Term": 20
+    },
+    "firstYear": {
+      "Begin Value": 10000000,
+      "Actual Payment Made": 0,
+      "Cumulative Make-Up Owed": 750000,
+      "End Value": 10800000
+    },
+    "flipYear": {
+      "Actual Payment Made": 5148219.648,
+      "End Value": 9545061.12
+    },
+    "rowCount": 20
+  }
+}
