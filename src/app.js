@@ -212,6 +212,7 @@ function renderAuditDetails(audit) {
     const entries = [
         ['Initial Contribution to CRUT', formatters.currency(audit['Initial Contribution to CRUT'])],
         ['DAF Donation Value', formatters.currency(audit['DAF Donation Value'])],
+        ['Flip Treatment Mode', audit['Flip Treatment Mode']],
         ['Section 7520 Source', audit['Section 7520 Source']],
         ['Section 7520 Selection', audit['Section 7520 Selection']],
         ['Section 7520 Rate Applied', formatters.percent(audit['Section 7520 Rate Applied'])],
@@ -456,8 +457,8 @@ function initializeExplanation() {
             <p class="text-xs text-gray-600 mb-3">A FLIP NIM-CRUT is a specialized trust designed to solve a specific problem: how to generate tax benefits and future income from a highly appreciated, non-income-producing asset (like private stock or real estate) without triggering a massive upfront tax bill.</p>
             <div class="space-y-2 text-xs">
                 <p><b>Act I: The Growth Phase (Pre-Flip).</b> The illiquid asset is placed in the trust. Since it generates no cash, the trust pays no income. However, the unpaid amount is tracked in a "make-up" account. The key benefit here is that the asset grows in a <b>tax-exempt environment</b>, maximizing its potential before the sale.</p>
-                <p><b>Act II: The Liquidity Event (The "Flip").</b> In the designated "flip year," the asset is sold. This floods the trust with cash, which is considered "income." The trust then makes a large, one-time distribution to you, consisting of the standard payout for that year PLUS the entire accumulated make-up balance.</p>
-                <p><b>Act III: The Income Phase (Post-Flip).</b> The trust now operates as a standard CRUT. The cash proceeds are reinvested into a diversified portfolio, providing you with a steady, predictable income stream for the rest of the trust's term.</p>
+                <p><b>Act II: The Trigger Year.</b> In the designated trigger year, the model now keeps the trust under the pre-flip NIMCRUT rules by default. Income limits still apply during that year and any makeup balance is carried into the transition.</p>
+                <p><b>Act III: The First Post-Flip Year.</b> Beginning in the following year, the trust converts to standard CRUT treatment. In Spec Mode, any remaining make-up balance is forfeited at that transition point before the standard unitrust payment stream begins.</p>
             </div>
         </div>
 

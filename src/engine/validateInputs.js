@@ -58,6 +58,10 @@ export function validateInputs(inputs) {
         warnings.push('Manual Section 7520 override is active; verify the rate against the applicable IRS month election.');
     }
 
+    if (inputs.flipTreatmentMode === 'Legacy Immediate Flip') {
+        warnings.push('Legacy flip mode pays accumulated makeup in the trigger year; use Spec Mode for the documented next-year flip/forfeiture treatment.');
+    }
+
     if (inputs.termType === 'Life Expectancy') {
         warnings.push('Life expectancy mode still uses the existing coarse lookup table in this tranche; actuarial table integration is planned for a later tranche.');
     }

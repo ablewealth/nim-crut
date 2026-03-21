@@ -157,18 +157,19 @@ test('summary report includes outright-sale benchmark outputs', () => {
     const result = runIllustration(buildDefaultInputs());
 
     assertApproxEqual(result.summary_report['Outright Sale Future Value'], 37474095.43654844, 'default outright-sale future value');
-    assertApproxEqual(result.summary_report['Net Benefit vs Outright Sale'], -20833578.61484079, 'default net benefit versus outright sale');
+    assertApproxEqual(result.summary_report['Net Benefit vs Outright Sale'], -19982881.3234198, 'default net benefit versus outright sale');
 });
 
 test('annual ledger exposes tranche-two audit columns and phase labels', () => {
     const result = runIllustration(buildDefaultInputs());
 
     assert.equal(result.annual_ledger[0].Phase, 'Pre-Flip NIMCRUT');
-    assert.equal(result.annual_ledger[4].Phase, 'Flip Year');
-    assert.equal(result.annual_ledger[5].Phase, 'Post-Flip CRUT');
+    assert.equal(result.annual_ledger[4].Phase, 'Trigger Year (Pre-Flip Rules)');
+    assert.equal(result.annual_ledger[5].Phase, 'First Post-Flip CRUT Year');
     assert.ok(Object.prototype.hasOwnProperty.call(result.annual_ledger[0], 'Income Generated'));
     assert.ok(Object.prototype.hasOwnProperty.call(result.annual_ledger[0], 'Value Before Payment'));
     assert.ok(Object.prototype.hasOwnProperty.call(result.annual_ledger[0], 'Make-Up Paid This Year'));
+    assert.ok(Object.prototype.hasOwnProperty.call(result.annual_ledger[0], 'Make-Up Forfeited This Year'));
 });
 
 
@@ -211,4 +212,20 @@ test('manual override mode uses the entered Section 7520 rate and emits a warnin
     assert.equal(result.audit['Section 7520 Selection'], 'Manual Override');
     assert.equal(result.audit['Section 7520 Rate Applied'], 5.2);
     assert.ok(result.validation.warnings.some((warning) => warning.includes('Manual Section 7520 override')));
+});
+
+
+test('spec mode forfeits remaining makeup in the first post-flip year', () => {
+    const result = runIllustration(buildDefaultInputs());
+
+    assertApproxEqual(result.projection_data[5]['Make-Up Forfeited This Year'], 4399950.72, 'spec-mode makeup forfeiture');
+    assert.equal(result.audit['Flip Treatment Mode'], 'Spec Mode');
+});
+
+test('legacy flip mode preserves the immediate flip-year payout behavior behind a warning', () => {
+    const result = runIllustration({ flipTreatmentMode: 'Legacy Immediate Flip' });
+
+    assert.equal(result.projection_data[4].Phase, 'Flip Year');
+    assert.ok(result.projection_data[4]['Actual Payment Made'] > 0);
+    assert.ok(result.validation.warnings.some((warning) => warning.includes('Legacy flip mode')));
 });

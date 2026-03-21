@@ -94,6 +94,7 @@ export function runIllustration(rawInputs = {}) {
         postFlipIncomeYield,
         postFlipCapAppreciation,
         flipTriggerYear,
+        flipTreatmentMode,
         payoutSchedule,
         grantorOrdinaryTaxRate,
         capitalGainsTaxRate,
@@ -223,15 +224,25 @@ export function runIllustration(rawInputs = {}) {
         cumulativeClientFees += clientFeePaid;
 
         const growthBase = beginValue - clientFeePaid;
-        const phase = year < flipTriggerYear
-            ? 'Pre-Flip NIMCRUT'
-            : year === flipTriggerYear
-                ? 'Flip Year'
-                : 'Post-Flip CRUT';
+        const isSpecMode = flipTreatmentMode === 'Spec Mode';
+        const isPreFlipYear = isSpecMode ? year <= flipTriggerYear : year < flipTriggerYear;
+        const phase = isSpecMode
+            ? year < flipTriggerYear
+                ? 'Pre-Flip NIMCRUT'
+                : year === flipTriggerYear
+                    ? 'Trigger Year (Pre-Flip Rules)'
+                    : year === flipTriggerYear + 1
+                        ? 'First Post-Flip CRUT Year'
+                        : 'Post-Flip CRUT'
+            : year < flipTriggerYear
+                ? 'Pre-Flip NIMCRUT'
+                : year === flipTriggerYear
+                    ? 'Flip Year'
+                    : 'Post-Flip CRUT';
 
         let incomeGenerated;
         let appreciation;
-        if (year < flipTriggerYear) {
+        if (isPreFlipYear) {
             incomeGenerated = growthBase * preFlipIncomeYieldDec;
             appreciation = growthBase * preFlipGrowthRateDec;
         } else {
@@ -246,7 +257,24 @@ export function runIllustration(rawInputs = {}) {
 
         let actualPayment;
         let makeupPaidThisYear = 0;
-        if (year < flipTriggerYear) {
+        let makeupForfeitedThisYear = 0;
+        if (isSpecMode) {
+            if (year <= flipTriggerYear) {
+                const paymentLimit = incomeGenerated;
+                const unitrustDeficit = Math.max(0, unitrustAmount - paymentLimit);
+                makeupOwed += unitrustDeficit;
+                const excessIncome = Math.max(0, paymentLimit - unitrustAmount);
+                makeupPaidThisYear = Math.min(excessIncome, makeupOwed);
+                actualPayment = Math.min(unitrustAmount, paymentLimit) + makeupPaidThisYear;
+                makeupOwed -= makeupPaidThisYear;
+            } else {
+                if (year === flipTriggerYear + 1) {
+                    makeupForfeitedThisYear = makeupOwed;
+                    makeupOwed = 0;
+                }
+                actualPayment = unitrustAmount;
+            }
+        } else if (year < flipTriggerYear) {
             makeupOwed += makeupOwedThisYear;
             actualPayment = incomeGenerated;
         } else if (year === flipTriggerYear) {
@@ -282,6 +310,7 @@ export function runIllustration(rawInputs = {}) {
             'Make-Up Owed Start': makeupOwedStart,
             'Make-Up Owed This Year': makeupOwedThisYear,
             'Make-Up Paid This Year': makeupPaidThisYear,
+            'Make-Up Forfeited This Year': makeupForfeitedThisYear,
             'Actual Payment Made': actualPayment,
             'State Tax Saved': stateTaxSavedForYear,
             'Cumulative Make-Up Owed': makeupOwed,
@@ -304,6 +333,7 @@ export function runIllustration(rawInputs = {}) {
         'Make-Up Owed Start': row['Make-Up Owed Start'],
         'Make-Up Owed This Year': row['Make-Up Owed This Year'],
         'Make-Up Paid This Year': row['Make-Up Paid This Year'],
+        'Make-Up Forfeited This Year': row['Make-Up Forfeited This Year'],
         'Client Fee Paid': row['Client Fee Paid'],
         'Actual Payment Made': row['Actual Payment Made'],
         'State Tax Saved': row['State Tax Saved'],
@@ -350,6 +380,7 @@ export function runIllustration(rawInputs = {}) {
     const audit = {
         'Initial Contribution to CRUT': initialContributionForCRUT,
         'DAF Donation Value': dafDonationValue,
+        'Flip Treatment Mode': flipTreatmentMode,
         'Basis Allocated to CRUT': basisForCRUT,
         'Section 7520 Source': inputs.section7520RateMode,
         'Section 7520 Selection': section7520SelectionLabel,
