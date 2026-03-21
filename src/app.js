@@ -212,6 +212,9 @@ function renderAuditDetails(audit) {
     const entries = [
         ['Initial Contribution to CRUT', formatters.currency(audit['Initial Contribution to CRUT'])],
         ['DAF Donation Value', formatters.currency(audit['DAF Donation Value'])],
+        ['Section 7520 Source', audit['Section 7520 Source']],
+        ['Section 7520 Selection', audit['Section 7520 Selection']],
+        ['Section 7520 Rate Applied', formatters.percent(audit['Section 7520 Rate Applied'])],
         ['Adjusted Payout Rate', formatters.percent(audit['Adjusted Payout Rate'] * 100)],
         ['Charitable Remainder Factor', formatters.percent(audit['Charitable Remainder Factor'] * 100)],
         ['Present Value of Remainder', formatters.currency(audit['Present Value of Remainder'])],

@@ -1,4 +1,5 @@
 import { normalizeInputs } from '../config/inputs.js';
+import { findSection7520RatePreset } from '../data/section7520Rates.js';
 import { validateInputs } from './validateInputs.js';
 
 const LIFE_EXPECTANCY_TABLE = {
@@ -73,6 +74,14 @@ export function runIllustration(rawInputs = {}) {
         return createValidationResponse(inputs, validation);
     }
 
+    const selectedSection7520Preset = findSection7520RatePreset(inputs.section7520RatePreset);
+    const appliedSection7520Rate = inputs.section7520RateMode === 'IRS Preset'
+        ? selectedSection7520Preset.rate
+        : inputs.section_7520_rate;
+    const section7520SelectionLabel = inputs.section7520RateMode === 'IRS Preset'
+        ? selectedSection7520Preset.label
+        : 'Manual Override';
+
     let {
         initialContribution,
         assetBasis,
@@ -86,7 +95,6 @@ export function runIllustration(rawInputs = {}) {
         postFlipCapAppreciation,
         flipTriggerYear,
         payoutSchedule,
-        section_7520_rate,
         grantorOrdinaryTaxRate,
         capitalGainsTaxRate,
         useDAF,
@@ -121,12 +129,12 @@ export function runIllustration(rawInputs = {}) {
     const preFlipGrowthRateDec = preFlipGrowthRate / 100;
     const postFlipIncomeYieldDec = postFlipIncomeYield / 100;
     const postFlipCapAppreciationDec = postFlipCapAppreciation / 100;
-    const section7520RateDec = section_7520_rate / 100;
+    const section7520RateDec = appliedSection7520Rate / 100;
     const grantorOrdinaryTaxRateDec = grantorOrdinaryTaxRate / 100;
     const capitalGainsTaxRateDec = capitalGainsTaxRate / 100;
     const residenceStateTaxRateDec = residenceStateTaxRate / 100;
     const ningStateTaxRateDec = ningStateTaxRate / 100;
-    const effectiveStateTaxRateDec = Math.max(0, residenceStateTaxRateDec - ningStateTaxRateDec);
+    const effectiveStateTaxRateDec = useNingTrust ? Math.max(0, residenceStateTaxRateDec - ningStateTaxRateDec) : 0;
     const clientManagementFeeDec = useManagementFee ? (managementFeeRate / 100) : 0;
     const niitRate = 0.038;
 
@@ -343,6 +351,10 @@ export function runIllustration(rawInputs = {}) {
         'Initial Contribution to CRUT': initialContributionForCRUT,
         'DAF Donation Value': dafDonationValue,
         'Basis Allocated to CRUT': basisForCRUT,
+        'Section 7520 Source': inputs.section7520RateMode,
+        'Section 7520 Selection': section7520SelectionLabel,
+        'Section 7520 Revenue Ruling': selectedSection7520Preset.revenueRuling,
+        'Section 7520 Rate Applied': appliedSection7520Rate,
         'Adjusted Payout Rate': adjustedPayoutRate,
         'Charitable Remainder Factor': charitableRemainderFactor,
         'Present Value of Remainder': presentValueOfRemainder,

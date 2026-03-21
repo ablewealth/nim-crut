@@ -188,3 +188,27 @@ test('audit output records the applied pre-flip income yield', () => {
 
     assertApproxEqual(result.audit['Pre-Flip Income Yield Applied'], 0.015, 'audit pre-flip income yield');
 });
+
+
+test('IRS preset mode applies the selected Section 7520 rate metadata', () => {
+    const result = runIllustration({
+        section7520RateMode: 'IRS Preset',
+        section7520RatePreset: 'February 2026 (IRS 4.6%)'
+    });
+
+    assert.equal(result.audit['Section 7520 Source'], 'IRS Preset');
+    assert.equal(result.audit['Section 7520 Selection'], 'February 2026 (IRS 4.6%)');
+    assert.equal(result.audit['Section 7520 Rate Applied'], 4.6);
+});
+
+test('manual override mode uses the entered Section 7520 rate and emits a warning', () => {
+    const result = runIllustration({
+        section7520RateMode: 'Manual Override',
+        section_7520_rate: 5.2
+    });
+
+    assert.equal(result.audit['Section 7520 Source'], 'Manual Override');
+    assert.equal(result.audit['Section 7520 Selection'], 'Manual Override');
+    assert.equal(result.audit['Section 7520 Rate Applied'], 5.2);
+    assert.ok(result.validation.warnings.some((warning) => warning.includes('Manual Section 7520 override')));
+});

@@ -27,12 +27,12 @@
       "One-Time NIIT Paid (Trust)": 297920,
       "Total Client Fees Paid": 1217375.3448915137,
       "Initial DAF Deduction": 2000000,
-      "Initial CRUT Deduction": 1852205.1770916407,
+      "Initial CRUT Deduction": 1767151.826367461,
       "Calculated Trust Term": 15,
       "DAF Deduction Used": 150000,
       "DAF Deduction Carried Forward": 1850000,
       "CRUT Deduction Used": 0,
-      "CRUT Deduction Carried Forward": 1852205.1770916407
+      "CRUT Deduction Carried Forward": 1767151.826367461
     },
     "firstYear": {
       "Begin Value": 8000000,

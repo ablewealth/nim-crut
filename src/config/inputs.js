@@ -1,3 +1,5 @@
+import { defaultSection7520PresetId, section7520RatePresets } from '../data/section7520Rates.js';
+
 export const tooltips = {
     useDAF: 'Toggle to model a pre-sale contribution to a Donor-Advised Fund (DAF), which avoids capital gains and provides an immediate tax deduction.',
     dafContributionPercentage: 'The percentage of the total asset value to be donated to the DAF before the remainder is contributed to the CRUT.',
@@ -20,6 +22,8 @@ export const tooltips = {
     flipTriggerYear: 'The year in which the trust converts from a NIMCRUT to a standard CRUT, allowing for full payouts.',
     grantorOrdinaryTaxRate: 'The grantor\'s marginal income tax rate, used to calculate the value of the charitable deduction.',
     capitalGainsTaxRate: 'The tax rate applied to the profit from selling the asset.',
+    section7520RateMode: 'Choose whether to use the current IRS preset rates or a manual Section 7520 override.',
+    section7520RatePreset: 'Select the current month or one of the two prior IRS Section 7520 rates.',
     additionalContributionAmount: 'A future, one-time contribution to the trust.',
     additionalContributionYear: 'The year in which the additional contribution is made.',
     grantorAGI: 'The Grantor\'s Adjusted Gross Income. Used to calculate the 30% AGI limitation for DAF contributions.',
@@ -64,7 +68,9 @@ export const inputsConfig = [
 
     { id: 'grantorOrdinaryTaxRate', label: 'Ordinary Income Tax Rate', type: 'slider', value: 37, min: 10, max: 50, step: 1, format: 'percent', section: 'Tax' },
     { id: 'capitalGainsTaxRate', label: 'Capital Gains Tax Rate', type: 'slider', value: 20, min: 0, max: 30, step: 1, format: 'percent', section: 'Tax' },
-    { id: 'section_7520_rate', label: 'Section 7520 Rate', type: 'slider', value: 5.0, min: 0.2, max: 8, step: 0.2, format: 'percent', section: 'Tax' }
+    { id: 'section7520RateMode', label: 'Section 7520 Source', type: 'select', options: ['IRS Preset', 'Manual Override'], value: 'IRS Preset', section: 'Tax' },
+    { id: 'section7520RatePreset', label: 'Section 7520 Preset', type: 'select', options: section7520RatePresets.map((preset) => preset.label), value: section7520RatePresets.find((preset) => preset.id === defaultSection7520PresetId).label, section: 'Tax', dependsOn: 'section7520RateMode', dependsOnValue: 'IRS Preset' },
+    { id: 'section_7520_rate', label: 'Section 7520 Rate', type: 'slider', value: 4.8, min: 0.2, max: 8, step: 0.2, format: 'percent', section: 'Tax', dependsOn: 'section7520RateMode', dependsOnValue: 'Manual Override' }
 ];
 
 function coerceByType(config, value) {

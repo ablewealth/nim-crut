@@ -50,8 +50,12 @@ export function validateInputs(inputs) {
         }
     }
 
-    if (inputs.section_7520_rate <= 0) {
-        errors.push('Section 7520 rate must be greater than zero.');
+    if (inputs.section7520RateMode === 'Manual Override' && inputs.section_7520_rate <= 0) {
+        errors.push('Manual Section 7520 rate must be greater than zero.');
+    }
+
+    if (inputs.section7520RateMode === 'Manual Override') {
+        warnings.push('Manual Section 7520 override is active; verify the rate against the applicable IRS month election.');
     }
 
     if (inputs.termType === 'Life Expectancy') {
