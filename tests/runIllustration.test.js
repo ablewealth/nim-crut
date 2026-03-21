@@ -170,3 +170,21 @@ test('annual ledger exposes tranche-two audit columns and phase labels', () => {
     assert.ok(Object.prototype.hasOwnProperty.call(result.annual_ledger[0], 'Value Before Payment'));
     assert.ok(Object.prototype.hasOwnProperty.call(result.annual_ledger[0], 'Make-Up Paid This Year'));
 });
+
+
+test('pre-flip income yield generates pre-flip distributions and reduces makeup accrual', () => {
+    const result = runIllustration({
+        preFlipIncomeYield: 1,
+        preFlipGrowthRate: 8
+    });
+
+    assertApproxEqual(result.projection_data[0]['Income Generated'], 100000, 'first-year pre-flip income');
+    assertApproxEqual(result.projection_data[0]['Actual Payment Made'], 100000, 'first-year pre-flip payment');
+    assertApproxEqual(result.projection_data[0]['Cumulative Make-Up Owed'], 650000, 'first-year reduced makeup balance');
+});
+
+test('audit output records the applied pre-flip income yield', () => {
+    const result = runIllustration({ preFlipIncomeYield: 1.5 });
+
+    assertApproxEqual(result.audit['Pre-Flip Income Yield Applied'], 0.015, 'audit pre-flip income yield');
+});

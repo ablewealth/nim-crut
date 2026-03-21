@@ -12,7 +12,8 @@ export const tooltips = {
     termType: 'Choose whether the trust lasts for a fixed number of years or for the grantor\'s lifetime (calculated based on IRS tables).',
     trustTerm: 'The total duration of the trust in years (only applicable if "Term of Years" is selected).',
     payoutRate: 'The fixed percentage of the trust\'s value paid out to the beneficiary each year.',
-    preFlipGrowthRate: 'The projected annual growth rate of the illiquid asset before the flip.',
+    preFlipIncomeYield: 'The portion of pre-flip return that is treated as distributable trust accounting income before the flip.',
+    preFlipGrowthRate: 'The projected annual capital appreciation rate of the illiquid asset before the flip.',
     postFlipIncomeYield: 'The portion of the total return generated as income (dividends, interest) after the flip.',
     postFlipCapAppreciation: 'The portion of the total return from asset value growth after the flip.',
     payoutSchedule: 'The frequency of payments to the beneficiary (e.g., Annual, Quarterly).',
@@ -56,6 +57,7 @@ export const inputsConfig = [
     { id: 'payoutSchedule', label: 'Payout Schedule', type: 'select', options: ['Annual', 'Semi-Annual', 'Quarterly', 'Monthly'], value: 'Annual', section: 'Trust' },
     { id: 'flipTriggerYear', label: 'Flip Trigger Year', type: 'slider', value: 5, min: 1, max: 40, step: 1, format: 'integer', section: 'Trust' },
 
+    { id: 'preFlipIncomeYield', label: 'Pre-Flip Income Yield', type: 'slider', value: 0.00, min: 0, max: 10, step: 0.1, format: 'percent', section: 'Performance' },
     { id: 'preFlipGrowthRate', label: 'Pre-Flip Growth Rate', type: 'slider', value: 8.00, min: 0, max: 20, step: 0.01, format: 'percent', section: 'Performance' },
     { id: 'postFlipIncomeYield', label: 'Post-Flip Income Yield', type: 'slider', value: 2.00, min: 0, max: 15, step: 0.1, format: 'percent', section: 'Performance' },
     { id: 'postFlipCapAppreciation', label: 'Post-Flip Capital Appreciation', type: 'slider', value: 6.00, min: 0, max: 15, step: 0.1, format: 'percent', section: 'Performance' },

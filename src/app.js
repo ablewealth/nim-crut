@@ -6,6 +6,7 @@ let summaryChart = null;
 
 const inputContainer = document.getElementById('input-container');
 const summaryDetailsEl = document.getElementById('summary-details');
+const auditDetailsEl = document.getElementById('audit-details');
 const projectionHeadEl = document.getElementById('projection-head');
 const projectionBodyEl = document.getElementById('projection-body');
 const errorMessageEl = document.getElementById('error-message');
@@ -202,6 +203,36 @@ function updateDisplayedValues(currentInputs) {
     });
 }
 
+
+function renderAuditDetails(audit) {
+    if (!auditDetailsEl || !audit) {
+        return;
+    }
+
+    const entries = [
+        ['Initial Contribution to CRUT', formatters.currency(audit['Initial Contribution to CRUT'])],
+        ['DAF Donation Value', formatters.currency(audit['DAF Donation Value'])],
+        ['Adjusted Payout Rate', formatters.percent(audit['Adjusted Payout Rate'] * 100)],
+        ['Charitable Remainder Factor', formatters.percent(audit['Charitable Remainder Factor'] * 100)],
+        ['Present Value of Remainder', formatters.currency(audit['Present Value of Remainder'])],
+        ['Pre-Flip Income Yield Applied', formatters.percent(audit['Pre-Flip Income Yield Applied'] * 100)],
+        ['Trust NIIT Taxable Gain', formatters.currency(audit['Trust NIIT Taxable Gain'])],
+        ['Outright Sale NIIT Taxable Gain', formatters.currency(audit['Outright Sale NIIT Taxable Gain'])]
+    ];
+
+    auditDetailsEl.innerHTML = `
+        <div class="font-semibold text-gray-700">Methodology & audit snapshot</div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+            ${entries.map(([label, value]) => `
+                <div class="flex justify-between bg-gray-50 rounded-lg px-3 py-2">
+                    <span>${label}</span>
+                    <span class="font-medium text-gray-800">${value}</span>
+                </div>
+            `).join('')}
+        </div>
+    `;
+}
+
 function renderSummary(summary, inputs) {
     const chartData = {
         labels: ['Payments to Grantor', 'Remainder to Charity', 'Total Tax Savings'],
@@ -385,6 +416,7 @@ function updateModel() {
 
     if (result.error) {
         summaryDetailsEl.innerHTML = '';
+        if (auditDetailsEl) { auditDetailsEl.innerHTML = ''; }
         if (summaryChart) {
             summaryChart.destroy();
         }
@@ -402,6 +434,7 @@ function updateModel() {
     document.getElementById('additionalContributionYear').max = result.summary_report['Calculated Trust Term'];
 
     renderSummary(result.summary_report, result.inputs);
+    renderAuditDetails(result.audit);
     renderProjection(result.projection_data, result.inputs);
 }
 

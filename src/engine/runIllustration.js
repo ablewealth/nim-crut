@@ -80,6 +80,7 @@ export function runIllustration(rawInputs = {}) {
         termType,
         trustTerm,
         payoutRate,
+        preFlipIncomeYield,
         preFlipGrowthRate,
         postFlipIncomeYield,
         postFlipCapAppreciation,
@@ -116,6 +117,7 @@ export function runIllustration(rawInputs = {}) {
     }
 
     const payoutRateDec = payoutRate / 100;
+    const preFlipIncomeYieldDec = preFlipIncomeYield / 100;
     const preFlipGrowthRateDec = preFlipGrowthRate / 100;
     const postFlipIncomeYieldDec = postFlipIncomeYield / 100;
     const postFlipCapAppreciationDec = postFlipCapAppreciation / 100;
@@ -222,7 +224,7 @@ export function runIllustration(rawInputs = {}) {
         let incomeGenerated;
         let appreciation;
         if (year < flipTriggerYear) {
-            incomeGenerated = 0;
+            incomeGenerated = growthBase * preFlipIncomeYieldDec;
             appreciation = growthBase * preFlipGrowthRateDec;
         } else {
             incomeGenerated = growthBase * postFlipIncomeYieldDec;
@@ -346,6 +348,7 @@ export function runIllustration(rawInputs = {}) {
         'Present Value of Remainder': presentValueOfRemainder,
         'Payout Frequency Factor': payoutFrequencyFactor,
         'Management Fee Applied': clientManagementFeeDec,
+        'Pre-Flip Income Yield Applied': preFlipIncomeYieldDec,
         'Trust NIIT Taxable Gain': trustNiit.taxableGain,
         'Outright Sale NIIT Taxable Gain': outrightSaleNiit.taxableGain,
         'Validation Warnings': validation.warnings.length
