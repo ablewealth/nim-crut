@@ -298,10 +298,22 @@ function renderSummary(summary, inputs) {
             <span class="font-medium text-gray-500 text-xs">Total State Tax Saved (NING)</span>
             <span class="font-semibold text-sm text-blue-600">${formatters.currency(summary['Total State Tax Saved (NING)'])}</span>
         </div>
+        <div class="flex justify-between items-center bg-gray-50 p-2 rounded-lg ml-4 border-l-2">
+            <span class="font-medium text-gray-500 text-xs">Effective State Tax Savings Rate</span>
+            <span class="font-semibold text-sm text-blue-600">${formatters.percent(summary['Effective State Tax Savings Rate'])}</span>
+        </div>
         <div class="flex justify-between items-center bg-red-50 p-2 rounded-lg ml-4 border-l-2">
             <span class="font-medium text-gray-500 text-xs">One-Time NIIT Paid</span>
             <span class="font-semibold text-sm text-red-600">${formatters.currency(summary['One-Time NIIT Paid (Trust)'])}</span>
         </div>` : ''}
+        <div class="flex justify-between items-center bg-gray-50 p-2 rounded-lg">
+            <span class="font-medium text-gray-600 text-xs">Outright Sale Future Value</span>
+            <span class="font-semibold text-sm text-gray-800">${formatters.currency(summary['Outright Sale Future Value'])}</span>
+        </div>
+        <div class="flex justify-between items-center bg-indigo-50 p-2 rounded-lg">
+            <span class="font-medium text-gray-600 text-xs">Net Benefit vs Outright Sale</span>
+            <span class="font-semibold text-sm text-indigo-700">${formatters.currency(summary['Net Benefit vs Outright Sale'])}</span>
+        </div>
     `;
 }
 

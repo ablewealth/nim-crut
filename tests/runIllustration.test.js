@@ -128,17 +128,36 @@ test('invalid inputs return structured validation errors before projection', () 
     assert.equal(result.projection_data.length, 0);
 });
 
-test('warnings surface for currently captured-but-unused state and NIIT inputs', () => {
+test('NING state-tax savings use the residence-minus-NING differential', () => {
     const result = runIllustration({
         useNingTrust: true,
-        ningStateTaxRate: 5,
-        includeNIIT: true,
-        niitThreshold: 300000
+        residenceStateTaxRate: 10,
+        ningStateTaxRate: 3
     });
 
-    assert.equal(result.validation.warnings.length, 2);
-    assert.match(result.validation.warnings[0], /NING State Tax Rate/);
-    assert.match(result.validation.warnings[1], /NIIT MAGI Threshold/);
+    assertApproxEqual(result.summary_report['Effective State Tax Savings Rate'], 7, 'effective NING savings rate');
+    assertApproxEqual(
+        result.summary_report['Total State Tax Saved (NING)'],
+        result.summary_report['Total Payments to Grantor'] * 0.07,
+        'NING total state tax savings'
+    );
+});
+
+test('NIIT threshold can reduce the trust NIIT estimate to zero', () => {
+    const result = runIllustration({
+        useNingTrust: true,
+        includeNIIT: true,
+        niitThreshold: 20000000
+    });
+
+    assert.equal(result.summary_report['One-Time NIIT Paid (Trust)'], 0);
+});
+
+test('summary report includes outright-sale benchmark outputs', () => {
+    const result = runIllustration(buildDefaultInputs());
+
+    assertApproxEqual(result.summary_report['Outright Sale Future Value'], 37474095.43654844, 'default outright-sale future value');
+    assertApproxEqual(result.summary_report['Net Benefit vs Outright Sale'], -20833578.61484079, 'default net benefit versus outright sale');
 });
 
 test('annual ledger exposes tranche-two audit columns and phase labels', () => {

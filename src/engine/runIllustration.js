@@ -55,6 +55,16 @@ function createValidationResponse(inputs, validation) {
     };
 }
 
+function calculateSimplifiedNiit({ gainAmount, grantorAGI, niitThreshold, niitRate }) {
+    const taxableExcess = Math.max(0, (grantorAGI + gainAmount) - niitThreshold);
+    const taxableGain = Math.min(gainAmount, taxableExcess);
+
+    return {
+        taxableGain,
+        tax: taxableGain * niitRate
+    };
+}
+
 export function runIllustration(rawInputs = {}) {
     const inputs = normalizeInputs(rawInputs);
     const validation = validateInputs(inputs);
@@ -82,7 +92,9 @@ export function runIllustration(rawInputs = {}) {
         dafContributionPercentage,
         useNingTrust,
         residenceStateTaxRate,
+        ningStateTaxRate,
         includeNIIT,
+        niitThreshold,
         useManagementFee,
         managementFeeRate,
         additionalContributionAmount,
@@ -111,6 +123,8 @@ export function runIllustration(rawInputs = {}) {
     const grantorOrdinaryTaxRateDec = grantorOrdinaryTaxRate / 100;
     const capitalGainsTaxRateDec = capitalGainsTaxRate / 100;
     const residenceStateTaxRateDec = residenceStateTaxRate / 100;
+    const ningStateTaxRateDec = ningStateTaxRate / 100;
+    const effectiveStateTaxRateDec = Math.max(0, residenceStateTaxRateDec - ningStateTaxRateDec);
     const clientManagementFeeDec = useManagementFee ? (managementFeeRate / 100) : 0;
     const niitRate = 0.038;
 
@@ -176,11 +190,11 @@ export function runIllustration(rawInputs = {}) {
 
     const upfrontTaxSavingsFromCRUT = crutDeductionUsed * grantorOrdinaryTaxRateDec;
 
-    let oneTimeNiitPaid = 0;
-    if (useNingTrust && includeNIIT) {
-        const totalGainInCRUT = initialContributionForCRUT - basisForCRUT;
-        oneTimeNiitPaid = totalGainInCRUT * niitRate;
-    }
+    const totalGainInCRUT = Math.max(0, initialContributionForCRUT - basisForCRUT);
+    const trustNiit = (useNingTrust && includeNIIT)
+        ? calculateSimplifiedNiit({ gainAmount: totalGainInCRUT, grantorAGI, niitThreshold, niitRate })
+        : { taxableGain: 0, tax: 0 };
+    const oneTimeNiitPaid = trustNiit.tax;
 
     const annual_ledger = [];
     let makeupOwed = 0;
@@ -236,7 +250,7 @@ export function runIllustration(rawInputs = {}) {
 
         let stateTaxSavedForYear = 0;
         if (useNingTrust) {
-            stateTaxSavedForYear = actualPayment * residenceStateTaxRateDec;
+            stateTaxSavedForYear = actualPayment * effectiveStateTaxRateDec;
             totalStateTaxSaved += stateTaxSavedForYear;
         }
 
@@ -292,6 +306,15 @@ export function runIllustration(rawInputs = {}) {
     const upfrontTaxSavings = upfrontTaxSavingsFromDAF + upfrontTaxSavingsFromCRUT;
     const totalBenefit = totalPaymentsToGrantor + totalStateTaxSaved - oneTimeNiitPaid + upfrontTaxSavings + avoidedCapitalGainsOnDAF;
 
+    const outrightSaleGain = Math.max(0, initialContribution - assetBasis);
+    const outrightSaleNiit = includeNIIT
+        ? calculateSimplifiedNiit({ gainAmount: outrightSaleGain, grantorAGI, niitThreshold, niitRate })
+        : { taxableGain: 0, tax: 0 };
+    const outrightSaleNetProceeds = initialContribution - (outrightSaleGain * capitalGainsTaxRateDec) - outrightSaleNiit.tax;
+    const benchmarkGrowthRateDec = Math.max(0, postFlipIncomeYieldDec + postFlipCapAppreciationDec - clientManagementFeeDec);
+    const outrightSaleFutureValue = outrightSaleNetProceeds * Math.pow(1 + benchmarkGrowthRateDec, trustTerm);
+    const netBenefitVsOutrightSale = totalBenefit - outrightSaleFutureValue;
+
     const summary_report = {
         'Total Benefit of Strategy': totalBenefit,
         'Total Payments to Grantor': totalPaymentsToGrantor,
@@ -299,6 +322,7 @@ export function runIllustration(rawInputs = {}) {
         'Total Upfront Tax Savings': upfrontTaxSavings,
         'Avoided Cap. Gains (DAF)': avoidedCapitalGainsOnDAF,
         'Total State Tax Saved (NING)': totalStateTaxSaved,
+        'Effective State Tax Savings Rate': effectiveStateTaxRateDec * 100,
         'One-Time NIIT Paid (Trust)': oneTimeNiitPaid,
         'Total Client Fees Paid': cumulativeClientFees,
         'Initial DAF Deduction': dafTaxDeduction,
@@ -307,7 +331,10 @@ export function runIllustration(rawInputs = {}) {
         'DAF Deduction Used': dafDeductionUsed,
         'DAF Deduction Carried Forward': dafDeductionCarriedForward,
         'CRUT Deduction Used': crutDeductionUsed,
-        'CRUT Deduction Carried Forward': crutDeductionCarriedForward
+        'CRUT Deduction Carried Forward': crutDeductionCarriedForward,
+        'Outright Sale Net Proceeds': outrightSaleNetProceeds,
+        'Outright Sale Future Value': outrightSaleFutureValue,
+        'Net Benefit vs Outright Sale': netBenefitVsOutrightSale
     };
 
     const audit = {
@@ -319,6 +346,8 @@ export function runIllustration(rawInputs = {}) {
         'Present Value of Remainder': presentValueOfRemainder,
         'Payout Frequency Factor': payoutFrequencyFactor,
         'Management Fee Applied': clientManagementFeeDec,
+        'Trust NIIT Taxable Gain': trustNiit.taxableGain,
+        'Outright Sale NIIT Taxable Gain': outrightSaleNiit.taxableGain,
         'Validation Warnings': validation.warnings.length
     };
 

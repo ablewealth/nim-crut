@@ -54,14 +54,6 @@ export function validateInputs(inputs) {
         errors.push('Section 7520 rate must be greater than zero.');
     }
 
-    if (inputs.useNingTrust && inputs.ningStateTaxRate > 0) {
-        warnings.push('NING State Tax Rate is captured but not yet used in the current state-tax savings formula.');
-    }
-
-    if (inputs.useNingTrust && inputs.includeNIIT && inputs.niitThreshold !== 250000) {
-        warnings.push('NIIT MAGI Threshold is captured for future work but is not yet used in the current NIIT estimate.');
-    }
-
     if (inputs.termType === 'Life Expectancy') {
         warnings.push('Life expectancy mode still uses the existing coarse lookup table in this tranche; actuarial table integration is planned for a later tranche.');
     }
