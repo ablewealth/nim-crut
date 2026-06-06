@@ -29,12 +29,29 @@ const PAYOUT_FREQUENCY_FACTORS = {
 };
 
 function calculateLifeExpectancyTerm(grantorAge) {
-    const ages = Object.keys(LIFE_EXPECTANCY_TABLE).map(Number);
-    const closestAge = ages.reduce((previous, current) => (
-        Math.abs(current - grantorAge) < Math.abs(previous - grantorAge) ? current : previous
-    ));
+    const ages = Object.keys(LIFE_EXPECTANCY_TABLE).map(Number).sort((a, b) => a - b);
+    const minAge = ages[0];
+    const maxAge = ages[ages.length - 1];
 
-    return LIFE_EXPECTANCY_TABLE[closestAge];
+    // Clamp to the supported range, then linearly interpolate between the two
+    // bracketing anchor ages instead of snapping to the nearest one. This keeps
+    // the term continuous across ages; it is still an approximation pending
+    // integration of IRS Mortality Table 2010CM (see REBUILD_BACKLOG Task 2.3).
+    if (grantorAge <= minAge) {
+        return LIFE_EXPECTANCY_TABLE[minAge];
+    }
+    if (grantorAge >= maxAge) {
+        return LIFE_EXPECTANCY_TABLE[maxAge];
+    }
+
+    const lowerAge = ages.filter((age) => age <= grantorAge).pop();
+    const upperAge = ages.find((age) => age > grantorAge);
+    const lowerTerm = LIFE_EXPECTANCY_TABLE[lowerAge];
+    const upperTerm = LIFE_EXPECTANCY_TABLE[upperAge];
+    const fraction = (grantorAge - lowerAge) / (upperAge - lowerAge);
+    const interpolatedTerm = lowerTerm + (upperTerm - lowerTerm) * fraction;
+
+    return Math.round(interpolatedTerm);
 }
 
 function calculateTermCertainRemainderFactor(term, adjustedPayoutRate) {
@@ -74,6 +91,37 @@ function calculateSimplifiedNiit({ gainAmount, grantorAGI, niitThreshold, niitRa
         taxableGain,
         tax: taxableGain * niitRate
     };
+}
+
+function buildDisclosures({ termType, payoutSchedule, useNingTrust, includeNIIT, additionalContributionAmount }) {
+    const disclosures = [
+        'Unitrust payments are calculated on the beginning-of-year trust value. The "Value Before Payment" ledger column is shown for reference and is not the payout base.',
+        'Total Benefit aggregates undiscounted multi-year cash distributions with present-value upfront tax savings and is shown before the beneficiary\'s income tax on distributions; the figures are not time-value adjusted.'
+    ];
+
+    if (termType === 'Life Expectancy') {
+        disclosures.push('Life-based term is interpolated from an approximate life-expectancy table and is not derived from IRS Mortality Table 2010CM; verify before relying on life-based results.');
+    }
+
+    if (payoutSchedule && payoutSchedule !== 'Annual') {
+        disclosures.push('Payment-frequency adjustment uses fixed approximations of IRS Publication 1458 Table F and does not vary with the section 7520 rate.');
+    }
+
+    if (includeNIIT) {
+        disclosures.push('The 3.8% NIIT is applied only to the outright-sale benchmark. The CRUT is income-tax exempt on the asset sale under IRC 664(c); NIIT on the character of distributions to the beneficiary is not modeled.');
+    }
+
+    if (useNingTrust) {
+        disclosures.push('NING state-tax savings assume the entire distribution is subject to the residence-state rate. Distribution character tiers (e.g., return of corpus) are not modeled, which may overstate the savings.');
+    }
+
+    if (additionalContributionAmount > 0) {
+        disclosures.push('Additional contributions increase trust corpus but do not generate an incremental charitable deduction and are not re-tested against the 10% remainder requirement.');
+    }
+
+    disclosures.push('Outright-sale benchmark compounds after-capital-gains-tax proceeds at the post-flip net return with no annual income-tax drag; it is a pre-personal-income-tax comparison.');
+
+    return disclosures;
 }
 
 export function runIllustration(rawInputs = {}) {
@@ -128,9 +176,9 @@ export function runIllustration(rawInputs = {}) {
         trustTerm = calculateLifeExpectancyTerm(grantorAge);
     }
 
-    if (flipTriggerYear > trustTerm) {
+    if (flipTriggerYear >= trustTerm) {
         return createValidationResponse(inputs, {
-            errors: ['Flip trigger year cannot exceed the calculated trust term.'],
+            errors: ['Flip trigger year must be earlier than the calculated trust term so a post-flip year exists.'],
             warnings: validation.warnings
         });
     }
@@ -208,11 +256,13 @@ export function runIllustration(rawInputs = {}) {
 
     const upfrontTaxSavingsFromCRUT = crutDeductionUsed * grantorOrdinaryTaxRateDec;
 
-    const totalGainInCRUT = Math.max(0, initialContributionForCRUT - basisForCRUT);
-    const trustNiit = (useNingTrust && includeNIIT)
-        ? calculateSimplifiedNiit({ gainAmount: totalGainInCRUT, grantorAGI, niitThreshold, niitRate })
-        : { taxableGain: 0, tax: 0 };
-    const oneTimeNiitPaid = trustNiit.tax;
+    // A CRUT is exempt from income tax (including the 3.8% NIIT) on gains it
+    // realizes when the contributed asset is sold (IRC 664(c)). The trust
+    // therefore pays no one-time NIIT on the embedded gain. NIIT on the
+    // character of distributions carried out to the beneficiary is not modeled;
+    // see the disclosures array. NIIT still applies to the outright-sale
+    // benchmark below, where the individual sells the asset directly.
+    const oneTimeNiitPaid = 0;
 
     const annual_ledger = [];
     let makeupOwed = 0;
@@ -404,10 +454,18 @@ export function runIllustration(rawInputs = {}) {
         'Payout Frequency Factor': payoutFrequencyFactor,
         'Management Fee Applied': clientManagementFeeDec,
         'Pre-Flip Income Yield Applied': preFlipIncomeYieldDec,
-        'Trust NIIT Taxable Gain': trustNiit.taxableGain,
+        'Unitrust Valuation Basis': 'Beginning-of-year fair market value',
         'Outright Sale NIIT Taxable Gain': outrightSaleNiit.taxableGain,
         'Validation Warnings': validation.warnings.length
     };
 
-    return { projection_data, annual_ledger, summary_report, audit, inputs, validation };
+    const disclosures = buildDisclosures({
+        termType,
+        payoutSchedule,
+        useNingTrust,
+        includeNIIT,
+        additionalContributionAmount
+    });
+
+    return { projection_data, annual_ledger, summary_report, audit, disclosures, inputs, validation };
 }

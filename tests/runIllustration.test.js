@@ -93,15 +93,18 @@ test('DAF AGI limitation reduces usable deduction and creates carryforward', () 
     assert.equal(result.summary_report['DAF Deduction Carried Forward'], 1850000);
 });
 
-test('NING plus NIIT adds both state-tax savings and NIIT cost', () => {
+test('CRUT is NIIT-exempt on the sale while the outright-sale benchmark bears NIIT', () => {
     const result = runIllustration({
         useNingTrust: true,
         includeNIIT: true,
         residenceStateTaxRate: 10
     });
 
+    // The CRUT pays no NIIT on the sale (IRC 664(c)); NIIT only applies to the
+    // outright-sale benchmark where the individual sells the asset directly.
+    assert.equal(result.summary_report['One-Time NIIT Paid (Trust)'], 0);
     assert.ok(result.summary_report['Total State Tax Saved (NING)'] > 0);
-    assert.equal(result.summary_report['One-Time NIIT Paid (Trust)'], 372400);
+    assert.ok(result.audit['Outright Sale NIIT Taxable Gain'] > 0);
 });
 
 test('management fees accumulate when enabled', () => {
@@ -143,14 +146,19 @@ test('NING state-tax savings use the residence-minus-NING differential', () => {
     );
 });
 
-test('NIIT threshold can reduce the trust NIIT estimate to zero', () => {
-    const result = runIllustration({
-        useNingTrust: true,
-        includeNIIT: true,
-        niitThreshold: 20000000
-    });
+test('a high NIIT threshold removes NIIT from the outright-sale benchmark', () => {
+    const low = runIllustration({ includeNIIT: true, niitThreshold: 250000 });
+    const high = runIllustration({ includeNIIT: true, niitThreshold: 20000000 });
 
-    assert.equal(result.summary_report['One-Time NIIT Paid (Trust)'], 0);
+    assert.ok(low.audit['Outright Sale NIIT Taxable Gain'] > 0);
+    assert.equal(high.audit['Outright Sale NIIT Taxable Gain'], 0);
+});
+
+test('NIIT can be modeled independently of the NING strategy', () => {
+    const result = runIllustration({ includeNIIT: true, useNingTrust: false });
+
+    assert.ok(result.audit['Outright Sale NIIT Taxable Gain'] > 0);
+    assert.ok(result.disclosures.some((item) => item.includes('664(c)')));
 });
 
 test('summary report includes outright-sale benchmark outputs', () => {
@@ -269,4 +277,37 @@ test('term-of-years term cannot exceed the 20-year statutory maximum', () => {
 
     assert.match(result.error, /between 1 and 20 years/);
     assert.equal(result.projection_data.length, 0);
+});
+
+test('flip trigger year must be earlier than the trust term', () => {
+    const result = runIllustration({ termType: 'Term of Years', trustTerm: 10, flipTriggerYear: 10 });
+
+    assert.match(result.error, /earlier than/);
+    assert.equal(result.projection_data.length, 0);
+});
+
+test('life expectancy term interpolates between anchor ages instead of snapping', () => {
+    // Anchors: age 65 -> 19 years, age 70 -> 15 years. Age 67 should interpolate
+    // to ~17 (19 + (15-19)*0.4 = 17.4 -> 17), not snap to the nearest anchor.
+    const result = runIllustration({ termType: 'Life Expectancy', grantorAge: 67 });
+
+    assert.equal(result.summary_report['Calculated Trust Term'], 17);
+});
+
+test('disclosures surface methodology assumptions for the active options', () => {
+    const result = runIllustration({
+        termType: 'Life Expectancy',
+        payoutSchedule: 'Quarterly',
+        useNingTrust: true,
+        includeNIIT: true,
+        additionalContributionAmount: 100000,
+        additionalContributionYear: 3
+    });
+
+    assert.ok(Array.isArray(result.disclosures));
+    assert.ok(result.disclosures.some((item) => item.includes('664(c)')), 'NIIT/664(c) disclosure');
+    assert.ok(result.disclosures.some((item) => item.includes('Table F')), 'frequency-factor disclosure');
+    assert.ok(result.disclosures.some((item) => item.includes('2010CM')), 'life-table disclosure');
+    assert.ok(result.disclosures.some((item) => item.includes('NING')), 'NING disclosure');
+    assert.ok(result.disclosures.some((item) => item.includes('Additional contributions')), 'additional-contribution disclosure');
 });

@@ -27,8 +27,8 @@ export function validateInputs(inputs) {
     }
 
     const effectiveTrustTerm = inputs.termType === 'Life Expectancy' ? null : inputs.trustTerm;
-    if (effectiveTrustTerm !== null && inputs.flipTriggerYear > effectiveTrustTerm) {
-        errors.push('Flip trigger year cannot exceed the trust term.');
+    if (effectiveTrustTerm !== null && inputs.flipTriggerYear >= effectiveTrustTerm) {
+        errors.push('Flip trigger year must be earlier than the trust term so a post-flip year exists.');
     }
 
     if (inputs.additionalContributionAmount < 0) {
@@ -63,7 +63,11 @@ export function validateInputs(inputs) {
     }
 
     if (inputs.termType === 'Life Expectancy') {
-        warnings.push('Life expectancy mode still uses the existing coarse lookup table in this tranche; actuarial table integration is planned for a later tranche.');
+        warnings.push('Life expectancy mode interpolates an approximate life-expectancy table; 2010CM actuarial integration is planned for a later tranche.');
+    }
+
+    if (inputs.additionalContributionAmount > 0) {
+        warnings.push('Additional contributions add corpus but do not generate an incremental charitable deduction and are not re-tested against the 10% remainder requirement.');
     }
 
     return { errors, warnings };
