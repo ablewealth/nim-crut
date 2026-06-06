@@ -438,8 +438,11 @@ function updateModel() {
 
     errorMessageEl.classList.add('hidden');
     renderWarnings(result.validation?.warnings || []);
-    document.getElementById('flipTriggerYear').max = result.summary_report['Calculated Trust Term'];
-    document.getElementById('additionalContributionYear').max = result.summary_report['Calculated Trust Term'];
+    const calculatedTerm = result.summary_report['Calculated Trust Term'];
+    // The flip must leave at least one post-flip year, so cap its slider one
+    // year below the term to keep the control from offering an invalid value.
+    document.getElementById('flipTriggerYear').max = Math.max(1, calculatedTerm - 1);
+    document.getElementById('additionalContributionYear').max = calculatedTerm;
 
     renderSummary(result.summary_report, result.inputs);
     renderAuditDetails(result.audit, result.disclosures);

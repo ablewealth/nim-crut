@@ -6,7 +6,7 @@ export const tooltips = {
     useNingTrust: 'Models the effect of using a Nevada Incomplete Gift Non-Grantor (NING) Trust to potentially avoid state income tax on CRUT distributions.',
     residenceStateTaxRate: 'The client\'s state income tax rate (e.g., NJ, CA). This is used to calculate the potential tax savings from a NING Trust.',
     ningStateTaxRate: 'The tax rate of the state where the NING trust is domiciled (typically 0% for states like Nevada or Delaware).',
-    includeNIIT: 'Toggle to include the 3.8% Net Investment Income Tax. For an active business sale, this may not apply, but a trust-based sale could trigger it. This is a critical variable for a professional to assess.',
+    includeNIIT: 'Toggle to apply the 3.8% Net Investment Income Tax to the outright-sale benchmark only. The CRUT itself is income-tax exempt on the sale under IRC 664(c), so this does not add a trust-level tax.',
     niitThreshold: 'The modified adjusted gross income (MAGI) threshold above which the NIIT may apply.',
     initialContribution: 'The fair market value of the asset(s) before any charitable contributions.',
     assetBasis: 'The original purchase price of the contributed asset, used for calculating capital gains tax.',
@@ -47,7 +47,7 @@ export const inputsConfig = [
     { id: 'useNingTrust', label: 'Use NING Trust Strategy', type: 'toggle', value: false, section: 'Strategy' },
     { id: 'residenceStateTaxRate', label: 'Residence State Tax Rate', type: 'slider', value: 10.75, min: 0, max: 15, step: 0.01, format: 'percent', section: 'Strategy', dependsOn: 'useNingTrust' },
     { id: 'ningStateTaxRate', label: 'NING State Tax Rate', type: 'slider', value: 0, min: 0, max: 15, step: 0.1, format: 'percent', section: 'Strategy', dependsOn: 'useNingTrust' },
-    { id: 'includeNIIT', label: 'Include NIIT on Sale', type: 'toggle', value: false, section: 'Strategy' },
+    { id: 'includeNIIT', label: 'Include NIIT on Outright Sale', type: 'toggle', value: false, section: 'Strategy' },
     { id: 'niitThreshold', label: 'NIIT MAGI Threshold', type: 'number', value: 250000, min: 0, max: 1000000, step: 10000, format: 'currency', section: 'Strategy', dependsOn: 'includeNIIT' },
 
     { id: 'initialContribution', label: 'Total Asset Value', type: 'number', value: 10000000, min: 10000, max: 50000000, step: 10000, format: 'currency', section: 'Asset' },

@@ -176,7 +176,10 @@ export function runIllustration(rawInputs = {}) {
         trustTerm = calculateLifeExpectancyTerm(grantorAge);
     }
 
-    if (flipTriggerYear >= trustTerm) {
+    // Term-of-years trusts are already checked against this rule in
+    // validateInputs. Life-expectancy trusts derive the term here, so this is
+    // the only place the constraint can be enforced for them.
+    if (termType === 'Life Expectancy' && flipTriggerYear >= trustTerm) {
         return createValidationResponse(inputs, {
             errors: ['Flip trigger year must be earlier than the calculated trust term so a post-flip year exists.'],
             warnings: validation.warnings
