@@ -37,7 +37,17 @@ function calculateLifeExpectancyTerm(grantorAge) {
     return LIFE_EXPECTANCY_TABLE[closestAge];
 }
 
-function calculateCharitableRemainderFactor(age, term, adjustedPayoutRate, rate7520) {
+function calculateTermCertainRemainderFactor(term, adjustedPayoutRate) {
+    // Term-of-years CRUT remainder factor per Treas. Reg. 1.664-4 (Table D):
+    // the remainder interest equals (1 - adjusted payout rate) ^ term. It is an
+    // exact, closed-form value and does not depend on the section 7520 rate or
+    // the beneficiary's age.
+    return Math.max(0, Math.min(1, Math.pow(1 - adjustedPayoutRate, term)));
+}
+
+function calculateLifeRemainderFactor(age, term, adjustedPayoutRate, rate7520) {
+    // Coarse approximation retained for life-based trusts pending 2010CM
+    // actuarial table integration (see docs/REBUILD_BACKLOG.md Task 2.3).
     const pvAnnuityFactor = (1 - Math.pow(1 + rate7520, -term)) / rate7520;
     const beneficiaryInterest = pvAnnuityFactor * adjustedPayoutRate;
     const remainderFactor = Math.max(0, 1 - beneficiaryInterest);
@@ -170,12 +180,9 @@ export function runIllustration(rawInputs = {}) {
 
     const payoutFrequencyFactor = PAYOUT_FREQUENCY_FACTORS[payoutSchedule] ?? PAYOUT_FREQUENCY_FACTORS.Annual;
     const adjustedPayoutRate = payoutRateDec * payoutFrequencyFactor;
-    const charitableRemainderFactor = calculateCharitableRemainderFactor(
-        grantorAge,
-        trustTerm,
-        adjustedPayoutRate,
-        section7520RateDec
-    );
+    const charitableRemainderFactor = termType === 'Life Expectancy'
+        ? calculateLifeRemainderFactor(grantorAge, trustTerm, adjustedPayoutRate, section7520RateDec)
+        : calculateTermCertainRemainderFactor(trustTerm, adjustedPayoutRate);
     const presentValueOfRemainder = initialContributionForCRUT * charitableRemainderFactor;
 
     if ((presentValueOfRemainder / initialContributionForCRUT) < 0.10) {
@@ -275,8 +282,13 @@ export function runIllustration(rawInputs = {}) {
                 actualPayment = unitrustAmount;
             }
         } else if (year < flipTriggerYear) {
-            makeupOwed += makeupOwedThisYear;
-            actualPayment = incomeGenerated;
+            const paymentLimit = incomeGenerated;
+            const unitrustDeficit = Math.max(0, unitrustAmount - paymentLimit);
+            makeupOwed += unitrustDeficit;
+            const excessIncome = Math.max(0, paymentLimit - unitrustAmount);
+            makeupPaidThisYear = Math.min(excessIncome, makeupOwed);
+            actualPayment = Math.min(unitrustAmount, paymentLimit) + makeupPaidThisYear;
+            makeupOwed -= makeupPaidThisYear;
         } else if (year === flipTriggerYear) {
             makeupPaidThisYear = makeupOwed + makeupOwedThisYear;
             actualPayment = unitrustAmount + makeupPaidThisYear;

@@ -57,7 +57,7 @@ export const inputsConfig = [
 
     { id: 'grantorAge', label: 'Grantor Age', type: 'slider', value: 65, min: 20, max: 95, step: 1, format: 'integer', section: 'Trust' },
     { id: 'termType', label: 'Term Type', type: 'select', options: ['Term of Years', 'Life Expectancy'], value: 'Term of Years', section: 'Trust' },
-    { id: 'trustTerm', label: 'Term of Years', type: 'slider', value: 20, min: 1, max: 40, step: 1, format: 'integer', section: 'Trust', dependsOn: 'termType', dependsOnValue: 'Term of Years' },
+    { id: 'trustTerm', label: 'Term of Years', type: 'slider', value: 20, min: 1, max: 20, step: 1, format: 'integer', section: 'Trust', dependsOn: 'termType', dependsOnValue: 'Term of Years' },
     { id: 'payoutRate', label: 'Payout Rate', type: 'slider', value: 7.50, min: 5, max: 15, step: 0.01, format: 'percent', section: 'Trust' },
     { id: 'payoutSchedule', label: 'Payout Schedule', type: 'select', options: ['Annual', 'Semi-Annual', 'Quarterly', 'Monthly'], value: 'Annual', section: 'Trust' },
     { id: 'flipTriggerYear', label: 'Flip Trigger Year', type: 'slider', value: 5, min: 1, max: 40, step: 1, format: 'integer', section: 'Trust' },

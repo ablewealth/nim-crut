@@ -157,7 +157,7 @@ test('summary report includes outright-sale benchmark outputs', () => {
     const result = runIllustration(buildDefaultInputs());
 
     assertApproxEqual(result.summary_report['Outright Sale Future Value'], 37474095.43654844, 'default outright-sale future value');
-    assertApproxEqual(result.summary_report['Net Benefit vs Outright Sale'], -19982881.3234198, 'default net benefit versus outright sale');
+    assertApproxEqual(result.summary_report['Net Benefit vs Outright Sale'], -19574779.5971134, 'default net benefit versus outright sale');
 });
 
 test('annual ledger exposes tranche-two audit columns and phase labels', () => {
@@ -228,4 +228,45 @@ test('legacy flip mode preserves the immediate flip-year payout behavior behind 
     assert.equal(result.projection_data[4].Phase, 'Flip Year');
     assert.ok(result.projection_data[4]['Actual Payment Made'] > 0);
     assert.ok(result.validation.warnings.some((warning) => warning.includes('Legacy flip mode')));
+});
+
+test('legacy pre-flip payout is capped at the unitrust amount when income exceeds it', () => {
+    const result = runIllustration({
+        flipTreatmentMode: 'Legacy Immediate Flip',
+        preFlipIncomeYield: 8,
+        preFlipGrowthRate: 0,
+        payoutRate: 7.5,
+        flipTriggerYear: 5
+    });
+
+    // Pre-flip income (8% = 800k) exceeds the unitrust target (7.5% = 750k); a
+    // NIMCRUT pays the lesser of the two, never the full income amount.
+    assertApproxEqual(result.projection_data[0]['Annual Payment Amount'], 750000, 'legacy pre-flip unitrust target');
+    assertApproxEqual(result.projection_data[0]['Actual Payment Made'], 750000, 'legacy pre-flip capped payment');
+});
+
+test('term-of-years remainder factor uses the closed-form (1 - adjusted payout)^term', () => {
+    const result = runIllustration({ termType: 'Term of Years', trustTerm: 20, payoutRate: 7.5 });
+
+    // (1 - 0.075)^20 = 0.21029776..., independent of the section 7520 rate.
+    assertApproxEqual(result.audit['Charitable Remainder Factor'], Math.pow(1 - 0.075, 20), 'term-certain remainder factor');
+    assertApproxEqual(result.summary_report['Initial CRUT Deduction'], 10000000 * Math.pow(1 - 0.075, 20), 'term-certain CRUT deduction');
+});
+
+test('term-of-years remainder factor is independent of grantor age', () => {
+    const young = runIllustration({ termType: 'Term of Years', trustTerm: 20, payoutRate: 7.5, grantorAge: 40 });
+    const old = runIllustration({ termType: 'Term of Years', trustTerm: 20, payoutRate: 7.5, grantorAge: 85 });
+
+    assertApproxEqual(
+        young.audit['Charitable Remainder Factor'],
+        old.audit['Charitable Remainder Factor'],
+        'age-independent term-certain factor'
+    );
+});
+
+test('term-of-years term cannot exceed the 20-year statutory maximum', () => {
+    const result = runIllustration({ termType: 'Term of Years', trustTerm: 25 });
+
+    assert.match(result.error, /between 1 and 20 years/);
+    assert.equal(result.projection_data.length, 0);
 });

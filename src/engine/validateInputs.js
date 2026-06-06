@@ -18,8 +18,8 @@ export function validateInputs(inputs) {
         errors.push('Payout rate must be between 5% and 50%.');
     }
 
-    if (inputs.termType === 'Term of Years' && (!Number.isInteger(inputs.trustTerm) || inputs.trustTerm < 1 || inputs.trustTerm > 40)) {
-        errors.push('Term-of-years mode requires a trust term between 1 and 40 years.');
+    if (inputs.termType === 'Term of Years' && (!Number.isInteger(inputs.trustTerm) || inputs.trustTerm < 1 || inputs.trustTerm > 20)) {
+        errors.push('Term-of-years mode requires a trust term between 1 and 20 years (IRC § 664(d)(2)(A)).');
     }
 
     if (inputs.flipTriggerYear < 1) {
