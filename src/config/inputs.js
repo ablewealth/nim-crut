@@ -6,7 +6,7 @@ export const tooltips = {
     useNingTrust: 'Models the effect of using a Nevada Incomplete Gift Non-Grantor (NING) Trust to potentially avoid state income tax on CRUT distributions.',
     residenceStateTaxRate: 'The client\'s state income tax rate (e.g., NJ, CA). This is used to calculate the potential tax savings from a NING Trust.',
     ningStateTaxRate: 'The tax rate of the state where the NING trust is domiciled (typically 0% for states like Nevada or Delaware).',
-    includeNIIT: 'Toggle to include the 3.8% Net Investment Income Tax. For an active business sale, this may not apply, but a trust-based sale could trigger it. This is a critical variable for a professional to assess.',
+    includeNIIT: 'Toggle to apply the 3.8% Net Investment Income Tax to the outright-sale benchmark only. The CRUT itself is income-tax exempt on the sale under IRC 664(c), so this does not add a trust-level tax.',
     niitThreshold: 'The modified adjusted gross income (MAGI) threshold above which the NIIT may apply.',
     initialContribution: 'The fair market value of the asset(s) before any charitable contributions.',
     assetBasis: 'The original purchase price of the contributed asset, used for calculating capital gains tax.',
@@ -37,7 +37,7 @@ export const tooltips = {
 export const inputsConfig = [
     { id: 'useDAF', label: 'Use DAF Pre-Sale Strategy', type: 'toggle', value: false, section: 'Strategy' },
     { id: 'dafContributionPercentage', label: 'DAF Contribution %', type: 'slider', value: 10, min: 1, max: 30, step: 1, format: 'percent', section: 'Strategy', dependsOn: 'useDAF' },
-    { id: 'grantorAGI', label: 'Grantor\'s AGI', type: 'number', value: 500000, min: 0, max: 10000000, step: 10000, format: 'currency', section: 'Strategy', dependsOn: 'useDAF' },
+    { id: 'grantorAGI', label: 'Grantor\'s AGI', type: 'number', value: 500000, min: 0, max: 10000000, step: 10000, format: 'currency', section: 'Strategy' },
     { id: 'applyAGILimitation', label: 'Apply 30% AGI Limit (DAF)', type: 'toggle', value: false, section: 'Strategy', dependsOn: 'useDAF' },
     { id: 'applyCRUTAGILimitation', label: 'Apply 30% AGI Limit (CRUT)', type: 'toggle', value: false, section: 'Strategy' },
 
@@ -47,8 +47,8 @@ export const inputsConfig = [
     { id: 'useNingTrust', label: 'Use NING Trust Strategy', type: 'toggle', value: false, section: 'Strategy' },
     { id: 'residenceStateTaxRate', label: 'Residence State Tax Rate', type: 'slider', value: 10.75, min: 0, max: 15, step: 0.01, format: 'percent', section: 'Strategy', dependsOn: 'useNingTrust' },
     { id: 'ningStateTaxRate', label: 'NING State Tax Rate', type: 'slider', value: 0, min: 0, max: 15, step: 0.1, format: 'percent', section: 'Strategy', dependsOn: 'useNingTrust' },
-    { id: 'includeNIIT', label: 'Include NIIT on Sale', type: 'toggle', value: false, section: 'Strategy', dependsOn: 'useNingTrust' },
-    { id: 'niitThreshold', label: 'NIIT MAGI Threshold', type: 'number', value: 250000, min: 0, max: 1000000, step: 10000, format: 'currency', section: 'Strategy', dependsOn: 'useNingTrust' },
+    { id: 'includeNIIT', label: 'Include NIIT on Outright Sale', type: 'toggle', value: false, section: 'Strategy' },
+    { id: 'niitThreshold', label: 'NIIT MAGI Threshold', type: 'number', value: 250000, min: 0, max: 1000000, step: 10000, format: 'currency', section: 'Strategy', dependsOn: 'includeNIIT' },
 
     { id: 'initialContribution', label: 'Total Asset Value', type: 'number', value: 10000000, min: 10000, max: 50000000, step: 10000, format: 'currency', section: 'Asset' },
     { id: 'assetBasis', label: 'Asset Basis', type: 'number', value: 200000, min: 0, max: 50000000, step: 10000, format: 'currency', section: 'Asset' },
@@ -57,8 +57,8 @@ export const inputsConfig = [
 
     { id: 'grantorAge', label: 'Grantor Age', type: 'slider', value: 65, min: 20, max: 95, step: 1, format: 'integer', section: 'Trust' },
     { id: 'termType', label: 'Term Type', type: 'select', options: ['Term of Years', 'Life Expectancy'], value: 'Term of Years', section: 'Trust' },
-    { id: 'trustTerm', label: 'Term of Years', type: 'slider', value: 20, min: 1, max: 40, step: 1, format: 'integer', section: 'Trust', dependsOn: 'termType', dependsOnValue: 'Term of Years' },
-    { id: 'payoutRate', label: 'Payout Rate', type: 'slider', value: 7.50, min: 5, max: 15, step: 0.01, format: 'percent', section: 'Trust' },
+    { id: 'trustTerm', label: 'Term of Years', type: 'slider', value: 20, min: 1, max: 20, step: 1, format: 'integer', section: 'Trust', dependsOn: 'termType', dependsOnValue: 'Term of Years' },
+    { id: 'payoutRate', label: 'Payout Rate', type: 'slider', value: 7.50, min: 5, max: 50, step: 0.01, format: 'percent', section: 'Trust' },
     { id: 'payoutSchedule', label: 'Payout Schedule', type: 'select', options: ['Annual', 'Semi-Annual', 'Quarterly', 'Monthly'], value: 'Annual', section: 'Trust' },
     { id: 'flipTriggerYear', label: 'Flip Trigger Year', type: 'slider', value: 5, min: 1, max: 40, step: 1, format: 'integer', section: 'Trust' },
     { id: 'flipTreatmentMode', label: 'Flip Treatment Mode', type: 'select', options: ['Spec Mode', 'Legacy Immediate Flip'], value: 'Spec Mode', section: 'Trust' },

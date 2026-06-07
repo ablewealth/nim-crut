@@ -18,13 +18,13 @@
   },
   "expected": {
     "summary": {
-      "Total Benefit of Strategy": 9626091.281753499,
+      "Total Benefit of Strategy": 9924011.281753499,
       "Total Payments to Grantor": 8615010.256139545,
       "Projected Remainder to Charity": 11123452.235739892,
       "Total Upfront Tax Savings": 55500,
       "Avoided Cap. Gains (DAF)": 392000,
       "Total State Tax Saved (NING)": 861501.0256139545,
-      "One-Time NIIT Paid (Trust)": 297920,
+      "One-Time NIIT Paid (Trust)": 0,
       "Total Client Fees Paid": 1624055.273392983,
       "Initial DAF Deduction": 2000000,
       "Initial CRUT Deduction": 1767151.826367461,

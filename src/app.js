@@ -204,7 +204,7 @@ function updateDisplayedValues(currentInputs) {
 }
 
 
-function renderAuditDetails(audit) {
+function renderAuditDetails(audit, disclosures = []) {
     if (!auditDetailsEl || !audit) {
         return;
     }
@@ -220,9 +220,16 @@ function renderAuditDetails(audit) {
         ['Charitable Remainder Factor', formatters.percent(audit['Charitable Remainder Factor'] * 100)],
         ['Present Value of Remainder', formatters.currency(audit['Present Value of Remainder'])],
         ['Pre-Flip Income Yield Applied', formatters.percent(audit['Pre-Flip Income Yield Applied'] * 100)],
-        ['Trust NIIT Taxable Gain', formatters.currency(audit['Trust NIIT Taxable Gain'])],
+        ['Unitrust Valuation Basis', audit['Unitrust Valuation Basis']],
         ['Outright Sale NIIT Taxable Gain', formatters.currency(audit['Outright Sale NIIT Taxable Gain'])]
     ];
+
+    const disclosureMarkup = disclosures.length === 0 ? '' : `
+        <div class="font-semibold text-gray-700 mt-4">Assumptions & disclosures</div>
+        <ul class="list-disc pl-5 space-y-1 text-xs text-gray-600">
+            ${disclosures.map((item) => `<li>${item}</li>`).join('')}
+        </ul>
+    `;
 
     auditDetailsEl.innerHTML = `
         <div class="font-semibold text-gray-700">Methodology & audit snapshot</div>
@@ -234,6 +241,7 @@ function renderAuditDetails(audit) {
                 </div>
             `).join('')}
         </div>
+        ${disclosureMarkup}
     `;
 }
 
@@ -336,10 +344,6 @@ function renderSummary(summary, inputs) {
         <div class="flex justify-between items-center bg-gray-50 p-2 rounded-lg ml-4 border-l-2">
             <span class="font-medium text-gray-500 text-xs">Effective State Tax Savings Rate</span>
             <span class="font-semibold text-sm text-blue-600">${formatters.percent(summary['Effective State Tax Savings Rate'])}</span>
-        </div>
-        <div class="flex justify-between items-center bg-red-50 p-2 rounded-lg ml-4 border-l-2">
-            <span class="font-medium text-gray-500 text-xs">One-Time NIIT Paid</span>
-            <span class="font-semibold text-sm text-red-600">${formatters.currency(summary['One-Time NIIT Paid (Trust)'])}</span>
         </div>` : ''}
         <div class="flex justify-between items-center bg-gray-50 p-2 rounded-lg">
             <span class="font-medium text-gray-600 text-xs">Outright Sale Future Value</span>
@@ -434,11 +438,14 @@ function updateModel() {
 
     errorMessageEl.classList.add('hidden');
     renderWarnings(result.validation?.warnings || []);
-    document.getElementById('flipTriggerYear').max = result.summary_report['Calculated Trust Term'];
-    document.getElementById('additionalContributionYear').max = result.summary_report['Calculated Trust Term'];
+    const calculatedTerm = result.summary_report['Calculated Trust Term'];
+    // The flip must leave at least one post-flip year, so cap its slider one
+    // year below the term to keep the control from offering an invalid value.
+    document.getElementById('flipTriggerYear').max = Math.max(1, calculatedTerm - 1);
+    document.getElementById('additionalContributionYear').max = calculatedTerm;
 
     renderSummary(result.summary_report, result.inputs);
-    renderAuditDetails(result.audit);
+    renderAuditDetails(result.audit, result.disclosures);
     renderProjection(result.projection_data, result.inputs);
 }
 

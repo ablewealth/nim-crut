@@ -2,11 +2,11 @@
   "inputs": {},
   "expected": {
     "summary": {
-      "Total Benefit of Strategy": 17491214.113128643,
+      "Total Benefit of Strategy": 17899315.83943504,
       "Total Payments to Grantor": 17121214.113128643,
       "Projected Remainder to Charity": 15834695.042208584,
-      "Total Upfront Tax Savings": 370000,
-      "Initial CRUT Deduction": 1000000,
+      "Total Upfront Tax Savings": 778101.7263063984,
+      "Initial CRUT Deduction": 2102977.6386659415,
       "Calculated Trust Term": 20
     },
     "firstYear": {
